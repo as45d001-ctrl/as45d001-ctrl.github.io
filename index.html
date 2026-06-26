@@ -8,7 +8,11 @@
 <meta name="apple-mobile-web-app-title" content="趨勢贏家">
 <meta name="theme-color" content="#0a0f1e">
 <meta name="description" content="趨勢贏家策略回測報告 — 幣安合約全市場掃描">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="趨勢贏家">
 <title>趨勢贏家 — 回測報告</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -747,7 +751,7 @@ renderRank();
 
 // ── Service Worker (PWA) ──
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  navigator.serviceWorker.register('./sw.js', {scope: './'}).catch(()=>{});
 }
 </script>
 </body>
