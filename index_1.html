@@ -1,0 +1,4239 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="趨勢贏家">
+<meta name="theme-color" content="#0a0f1e">
+<meta name="description" content="趨勢贏家策略回測報告 — 幣安合約全市場掃描">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>趨勢贏家 — 回測報告</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0f1e;--bg2:#111827;--bg3:#1a2235;
+  --border:rgba(255,255,255,0.07);
+  --text:#f0f4ff;--muted:#7b8db0;
+  --green:#00d98b;--green-dim:rgba(0,217,139,0.1);
+  --red:#ff4d6d;--red-dim:rgba(255,77,109,0.1);
+  --blue:#4d9fff;--blue-dim:rgba(77,159,255,0.1);
+  --amber:#ffb347;--amber-dim:rgba(255,179,71,0.08);
+  --radius:14px;--radius-sm:8px;
+}
+body{font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:480px;margin:0 auto;padding-bottom:80px;overflow-x:hidden}
+.header{padding:52px 20px 20px;background:linear-gradient(180deg,#0d1525 0%,var(--bg) 100%)}
+.header-eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:8px}
+.header h1{font-size:26px;font-weight:700;letter-spacing:-.3px;line-height:1.2}
+.header h1 span{color:var(--green)}
+.header-sub{margin-top:6px;font-size:13px;color:var(--muted)}
+.live-badge{display:inline-flex;align-items:center;gap:5px;background:var(--green-dim);color:var(--green);font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;margin-top:12px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.tf-tabs{display:flex;gap:6px;padding:0 16px 16px;overflow-x:auto;scrollbar-width:none}
+.tf-tabs::-webkit-scrollbar{display:none}
+.tf-btn{flex-shrink:0;padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+.tf-btn.active{background:var(--green);color:#000;border-color:var(--green);font-weight:700}
+.section{padding:0 16px;margin-bottom:24px}
+.section-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-left:4px}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hero-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden}
+.hero-card.wide{grid-column:1/-1}
+.hero-card.accent-green{border-color:rgba(0,217,139,.2)}
+.hero-card.accent-blue{border-color:rgba(77,159,255,.18)}
+.hero-card.accent-amber{border-color:rgba(255,179,71,.18)}
+.hero-card .label{font-size:11px;color:var(--muted);margin-bottom:6px}
+.hero-card .value{font-size:26px;font-weight:700;letter-spacing:-.5px;line-height:1}
+.hero-card .value.green{color:var(--green)}
+.hero-card .value.blue{color:var(--blue)}
+.hero-card .value.amber{color:var(--amber)}
+.hero-card .value.red{color:var(--red)}
+.hero-card .sub-value{font-size:12px;color:var(--muted);margin-top:5px}
+.hero-card .glow{position:absolute;right:-20px;bottom:-20px;width:80px;height:80px;border-radius:50%;filter:blur(30px);opacity:.2}
+.accent-green .glow{background:var(--green)}
+.accent-blue .glow{background:var(--blue)}
+.accent-amber .glow{background:var(--amber)}
+.tp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tp-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.tp-card .tp-label{font-size:11px;color:var(--muted);margin-bottom:8px}
+.tp-card .tp-pct{font-size:22px;font-weight:700;margin-bottom:8px}
+.tp-card.win .tp-pct{color:var(--green)}
+.tp-card.sl .tp-pct{color:var(--red)}
+.tp-card.total .tp-pct{color:var(--blue)}
+.tp-card.rr .tp-pct{color:var(--amber)}
+.bar-track{height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.win .bar-fill{background:var(--green)}
+.sl .bar-fill{background:var(--red)}
+.total .bar-fill{background:var(--blue)}
+.tp-count{font-size:11px;color:var(--muted);margin-top:5px}
+.summary-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:4px 16px}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--border)}
+.summary-row:last-child{border-bottom:none}
+.summary-row .sr-label{font-size:13px;color:var(--muted)}
+.summary-row .sr-val{font-size:14px;font-weight:600}
+.summary-row .sr-val.green{color:var(--green)}
+.summary-row .sr-val.red{color:var(--red)}
+.summary-row .sr-val.blue{color:var(--blue)}
+.summary-row .sr-val.amber{color:var(--amber)}
+.tab-wrap{display:flex;gap:8px;padding:0 16px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none}
+.tab-wrap::-webkit-scrollbar{display:none}
+.tab-btn{flex-shrink:0;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s}
+.tab-btn.active{background:var(--green);color:#000;border-color:var(--green);font-weight:700}
+.search-wrap{padding:0 16px;margin-bottom:14px}
+.search-input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-size:14px;outline:none}
+.search-input::placeholder{color:var(--muted)}
+.search-input:focus{border-color:var(--green)}
+.rank-list{display:flex;flex-direction:column;gap:8px}
+.rank-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:12px}
+.rank-num{font-size:13px;font-weight:700;color:var(--muted);min-width:22px;text-align:center}
+.rank-num.gold{color:#ffd700}
+.rank-num.silver{color:#c0c0c0}
+.rank-num.bronze{color:#cd7f32}
+.rank-body{flex:1;min-width:0}
+.rank-sym{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-meta{font-size:11px;color:var(--muted);margin-top:3px}
+.rank-right{text-align:right;flex-shrink:0}
+.rank-wr{font-size:16px;font-weight:700}
+.rank-pnl{font-size:11px;margin-top:2px}
+.rank-pnl.pos{color:var(--green)}
+.rank-pnl.neg{color:var(--red)}
+.about-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin:0 16px 14px}
+.about-card h3{font-size:15px;font-weight:600;margin-bottom:8px}
+.about-card p{font-size:13px;color:var(--muted);line-height:1.7}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tag{font-size:11px;padding:4px 10px;border-radius:20px;background:var(--bg3);border:1px solid var(--border);color:var(--muted)}
+.disclaimer{margin:0 16px 20px;background:var(--amber-dim);border:1px solid rgba(255,179,71,.18);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--amber);line-height:1.6}
+.install-banner{margin:0 16px 16px;background:linear-gradient(135deg,#0d1f3a,#0a1828);border:1px solid rgba(77,159,255,.25);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.install-icon{font-size:28px;flex-shrink:0}
+.install-text{flex:1}
+.install-text strong{display:block;font-size:14px;color:var(--text);margin-bottom:3px}
+.install-text span{font-size:12px;color:var(--muted)}
+.install-btn{padding:8px 14px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(10,15,30,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;padding:10px 0 max(10px,env(safe-area-inset-bottom))}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0}
+.nav-icon{font-size:20px;line-height:1}
+.nav-label{font-size:10px;color:var(--muted)}
+.nav-item.active .nav-label{color:var(--green)}
+.page{display:none}
+.page.active{display:block}
+</style>
+</head>
+<body>
+
+<div id="page-home" class="page active">
+  <div class="header">
+    <div class="header-eyebrow">Binance Futures × OrangeX · 2年回測</div>
+    <h1>趨勢贏家<br><span>回測報告</span></h1>
+    <p class="header-sub">636 個合約 · 本金 10,000U · 手續費 0.06%</p>
+    <div class="live-badge"><div class="live-dot"></div>最後更新：2026-06-30</div>
+  </div>
+
+  <div id="installBanner" class="install-banner" style="display:none">
+    <div class="install-icon">📲</div>
+    <div class="install-text">
+      <strong>安裝到桌面</strong>
+      <span>像 App 一樣快速開啟，支援離線瀏覽</span>
+    </div>
+    <button class="install-btn" onclick="installApp()">安裝</button>
+  </div>
+
+  <div class="tf-tabs">
+    <button class="tf-btn active" onclick="switchTF('30m',this)">30分</button>
+    <button class="tf-btn" onclick="switchTF('1h',this)">1H</button>
+    <button class="tf-btn" onclick="switchTF('4h',this)">4H</button>
+  </div>
+
+  <div class="section">
+    <div class="section-label">核心績效</div>
+    <div class="hero-grid">
+      <div class="hero-card wide accent-green">
+        <div class="label">最終資產</div>
+        <div class="value green" id="h_finalCap">—</div>
+        <div class="sub-value" id="h_capSub">—</div>
+        <div class="glow"></div>
+      </div>
+      <div class="hero-card accent-green">
+        <div class="label">整體勝率</div>
+        <div class="value green" id="h_winRate">—</div>
+        <div class="sub-value" id="h_winSub">—</div>
+        <div class="glow"></div>
+      </div>
+      <div class="hero-card accent-blue">
+        <div class="label">盈虧比</div>
+        <div class="value blue" id="h_rr">—</div>
+        <div class="sub-value">獲利÷虧損</div>
+        <div class="glow"></div>
+      </div>
+      <div class="hero-card">
+        <div class="label">總損益</div>
+        <div class="value green" id="h_pnl">—</div>
+        <div class="sub-value" id="h_feeSub">—</div>
+      </div>
+      <div class="hero-card">
+        <div class="label">測試幣種</div>
+        <div class="value amber" id="h_syms">—</div>
+        <div class="sub-value" id="h_sigSub">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">勝率與止損分布</div>
+    <div class="tp-grid">
+      <div class="tp-card win">
+        <div class="tp-label">止盈勝率</div>
+        <div class="tp-pct" id="tp_winRate">—</div>
+        <div class="bar-track"><div class="bar-fill" id="tp_winBar" style="width:0%"></div></div>
+        <div class="tp-count" id="tp_winCount">—</div>
+      </div>
+      <div class="tp-card sl">
+        <div class="tp-label">止損率</div>
+        <div class="tp-pct" id="tp_slRate">—</div>
+        <div class="bar-track"><div class="bar-fill" id="tp_slBar" style="width:0%"></div></div>
+        <div class="tp-count" id="tp_slCount">—</div>
+      </div>
+      <div class="tp-card total">
+        <div class="tp-label">有效訊號</div>
+        <div class="tp-pct" id="tp_total">—</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--blue)"></div></div>
+        <div class="tp-count">已結束訊號</div>
+      </div>
+      <div class="tp-card rr">
+        <div class="tp-label">平均獲利/筆</div>
+        <div class="tp-pct" id="tp_avgWin">—</div>
+        <div class="bar-track"><div class="bar-fill" style="width:80%;background:var(--amber)"></div></div>
+        <div class="tp-count" id="tp_avgLoss">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">詳細數據</div>
+    <div class="summary-card">
+      <div class="summary-row"><span class="sr-label">回測時間範圍</span><span class="sr-val blue" id="d_tf">—</span></div>
+      <div class="summary-row"><span class="sr-label">本金</span><span class="sr-val">10,000 U</span></div>
+      <div class="summary-row"><span class="sr-label">每筆倉位</span><span class="sr-val">10%（1,000 U）</span></div>
+      <div class="summary-row"><span class="sr-label">手續費（進出各計）</span><span class="sr-val">0.06%</span></div>
+      <div class="summary-row"><span class="sr-label">總手續費支出</span><span class="sr-val red" id="d_fee">—</span></div>
+      <div class="summary-row"><span class="sr-label">平均每筆獲利</span><span class="sr-val green" id="d_avgWin">—</span></div>
+      <div class="summary-row"><span class="sr-label">平均每筆虧損</span><span class="sr-val red" id="d_avgLoss">—</span></div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ 本報告為歷史回測數據，不代表未來獲利保證。加密貨幣交易具有高度風險，請自行評估後再做決策。</div>
+</div>
+
+<div id="page-rank" class="page">
+  <div class="header" style="padding-bottom:16px">
+    <div class="header-eyebrow">依勝率排序</div>
+    <h1>幣種<span>排行榜</span></h1>
+  </div>
+
+  <div class="tf-tabs">
+    <button class="tf-btn active" onclick="switchTFRank('30m',this)">30分</button>
+    <button class="tf-btn" onclick="switchTFRank('1h',this)">1H</button>
+    <button class="tf-btn" onclick="switchTFRank('4h',this)">4H</button>
+  </div>
+
+  <div class="tab-wrap">
+    <button class="tab-btn active" onclick="filterRank('all',this)">全部</button>
+    <button class="tab-btn" onclick="filterRank('win80',this)">勝率≥80%</button>
+    <button class="tab-btn" onclick="filterRank('win60',this)">勝率≥60%</button>
+    <button class="tab-btn" onclick="filterRank('pnl',this)">損益最高</button>
+    <button class="tab-btn" onclick="filterRank('loss',this)">虧損幣</button>
+  </div>
+
+  <div class="search-wrap">
+    <input class="search-input" type="search" placeholder="搜尋幣種，例：BTC" oninput="searchRank(this.value)">
+  </div>
+
+  <div class="section">
+    <div class="rank-list" id="rankList"></div>
+  </div>
+</div>
+
+<div id="page-about" class="page">
+  <div class="header" style="padding-bottom:16px">
+    <div class="header-eyebrow">策略說明</div>
+    <h1>關於<span>此策略</span></h1>
+  </div>
+
+  <div class="about-card">
+    <h3>策略核心邏輯</h3>
+    <p>趨勢贏家【做多專用】基於雙均線趨勢系統，專注捕捉強勢上升趨勢中的回調進場機會，只在特定強勢區間內觸發做多訊號。</p>
+    <div class="tag-row">
+      <span class="tag">趨勢順勢</span>
+      <span class="tag">只做多</span>
+      <span class="tag">均線回測</span>
+      <span class="tag">固定止損</span>
+    </div>
+  </div>
+
+  <div class="about-card">
+    <h3>三個市場區間</h3>
+    <p><strong style="color:var(--green)">強勢區間</strong> — 趨勢確立後，均線持續走揚且間距擴大，為唯一進場區間。<br><br>
+    <strong style="color:var(--amber)">觀察區間</strong> — 趨勢剛形成初期，尚在確認中，此策略不進場。<br><br>
+    <strong style="color:var(--muted)">空頭區間</strong> — 空頭趨勢下，此策略完全不進場，保護資金安全。</p>
+  </div>
+
+  <div class="about-card">
+    <h3>進場 &amp; 出場規則</h3>
+    <p>進場：價格觸及趨勢均線後反彈確認。<br><br>
+    進場價 = 趨勢快線<br>
+    止損 = 趨勢慢線<br>
+    止盈 = 進場 + 1倍風險（R）<br><br>
+    <strong style="color:var(--text)">冷卻機制：</strong>每個幣種觸發訊號後有冷卻期，避免過度交易。</p>
+  </div>
+
+  <div class="about-card">
+    <h3>回測參數</h3>
+    <p>本金 10,000 USDT · 每筆倉位 10%（1,000U）<br>手續費 0.06%（進出各一次）· 槓桿 1x<br>資料來源：幣安合約全市場<br>回測期間：近 2 年各時區數據</p>
+  </div>
+
+  <div class="about-card">
+    <h3>數據更新說明</h3>
+    <p>本網頁數據定期更新，每次更新後請重新整理頁面（或重新安裝 App）以取得最新回測結果。若您已安裝為桌面 App，請定期開啟確認數據。</p>
+  </div>
+
+  <div class="disclaimer">本網站僅供教育與研究目的，不構成任何投資建議。</div>
+</div>
+
+<nav class="bottom-nav">
+  <div class="nav-item active" onclick="switchPage('home',this)">
+    <div class="nav-icon">📊</div>
+    <div class="nav-label">總覽</div>
+  </div>
+  <div class="nav-item" onclick="switchPage('rank',this)">
+    <div class="nav-icon">🏆</div>
+    <div class="nav-label">排行榜</div>
+  </div>
+  <div class="nav-item" onclick="switchPage('about',this)">
+    <div class="nav-icon">📖</div>
+    <div class="nav-label">策略說明</div>
+  </div>
+</nav>
+
+<script>
+const TF_STATS = {
+  "30m": {
+    "timeframe": "30m",
+    "capital": 10000.0,
+    "symbols_tested": 636,
+    "total_signals": 945,
+    "total_closed": 938,
+    "total_wins": 577,
+    "win_rate": 61.51,
+    "tp_count": 577,
+    "sl_count": 361,
+    "tp_rate": 61.51,
+    "sl_rate": 38.49,
+    "total_pnl_u": 6157.98,
+    "total_fee_u": 1134.0,
+    "final_capital": 16157.98,
+    "avg_win_u": 40.69,
+    "avg_loss_u": -47.98,
+    "rr_ratio": 0.8481
+  },
+  "1h": {
+    "timeframe": "1h",
+    "capital": 10000.0,
+    "symbols_tested": 636,
+    "total_signals": 849,
+    "total_closed": 843,
+    "total_wins": 527,
+    "win_rate": 62.51,
+    "tp_count": 527,
+    "sl_count": 316,
+    "tp_rate": 62.51,
+    "sl_rate": 37.49,
+    "total_pnl_u": 10591.62,
+    "total_fee_u": 1018.8,
+    "final_capital": 20591.62,
+    "avg_win_u": 53.65,
+    "avg_loss_u": -55.95,
+    "rr_ratio": 0.9588
+  },
+  "4h": {
+    "timeframe": "4h",
+    "capital": 10000.0,
+    "symbols_tested": 636,
+    "total_signals": 1484,
+    "total_closed": 1478,
+    "total_wins": 955,
+    "win_rate": 64.61,
+    "tp_count": 955,
+    "sl_count": 523,
+    "tp_rate": 64.61,
+    "sl_rate": 35.39,
+    "total_pnl_u": 33735.5,
+    "total_fee_u": 1780.8,
+    "final_capital": 43735.5,
+    "avg_win_u": 70.8,
+    "avg_loss_u": -64.78,
+    "rr_ratio": 1.0929
+  }
+};
+const TF_COINS = {
+  "30m": [
+    {
+      "s": "KOMA",
+      "total": 13,
+      "wins": 13,
+      "wr": 100.0,
+      "pnl": 456.61
+    },
+    {
+      "s": "HANA",
+      "total": 11,
+      "wins": 11,
+      "wr": 100.0,
+      "pnl": 369.35
+    },
+    {
+      "s": "BROCCOLI714",
+      "total": 9,
+      "wins": 9,
+      "wr": 100.0,
+      "pnl": 228.78
+    },
+    {
+      "s": "CATI",
+      "total": 9,
+      "wins": 9,
+      "wr": 100.0,
+      "pnl": 250.01
+    },
+    {
+      "s": "PYTH",
+      "total": 9,
+      "wins": 9,
+      "wr": 100.0,
+      "pnl": 278.16
+    },
+    {
+      "s": "METIS",
+      "total": 8,
+      "wins": 8,
+      "wr": 100.0,
+      "pnl": 246.33
+    },
+    {
+      "s": "SYN",
+      "total": 8,
+      "wins": 8,
+      "wr": 100.0,
+      "pnl": 1231.64
+    },
+    {
+      "s": "B2",
+      "total": 7,
+      "wins": 7,
+      "wr": 100.0,
+      "pnl": 203.9
+    },
+    {
+      "s": "NBIS",
+      "total": 7,
+      "wins": 7,
+      "wr": 100.0,
+      "pnl": 259.8
+    },
+    {
+      "s": "SKHYNIX",
+      "total": 6,
+      "wins": 6,
+      "wr": 100.0,
+      "pnl": 173.96
+    },
+    {
+      "s": "A",
+      "total": 5,
+      "wins": 5,
+      "wr": 100.0,
+      "pnl": 137.31
+    },
+    {
+      "s": "ARM",
+      "total": 5,
+      "wins": 5,
+      "wr": 100.0,
+      "pnl": 146.79
+    },
+    {
+      "s": "CRWV",
+      "total": 5,
+      "wins": 5,
+      "wr": 100.0,
+      "pnl": 154.09
+    },
+    {
+      "s": "GRASS",
+      "total": 5,
+      "wins": 5,
+      "wr": 100.0,
+      "pnl": 151.07
+    },
+    {
+      "s": "IN",
+      "total": 5,
+      "wins": 5,
+      "wr": 100.0,
+      "pnl": 131.48
+    },
+    {
+      "s": "UAI",
+      "total": 5,
+      "wins": 5,
+      "wr": 100.0,
+      "pnl": 209.0
+    },
+    {
+      "s": "ARC",
+      "total": 4,
+      "wins": 4,
+      "wr": 100.0,
+      "pnl": 101.23
+    },
+    {
+      "s": "MORPHO",
+      "total": 4,
+      "wins": 4,
+      "wr": 100.0,
+      "pnl": 125.11
+    },
+    {
+      "s": "PARTI",
+      "total": 4,
+      "wins": 4,
+      "wr": 100.0,
+      "pnl": 114.57
+    },
+    {
+      "s": "WDC",
+      "total": 4,
+      "wins": 4,
+      "wr": 100.0,
+      "pnl": 172.0
+    },
+    {
+      "s": "COW",
+      "total": 3,
+      "wins": 3,
+      "wr": 100.0,
+      "pnl": 73.27
+    },
+    {
+      "s": "ETHFI",
+      "total": 3,
+      "wins": 3,
+      "wr": 100.0,
+      "pnl": 85.06
+    },
+    {
+      "s": "SSV",
+      "total": 3,
+      "wins": 3,
+      "wr": 100.0,
+      "pnl": 73.52
+    },
+    {
+      "s": "AMAT",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 51.67
+    },
+    {
+      "s": "ATH",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 48.12
+    },
+    {
+      "s": "ATOM",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 51.88
+    },
+    {
+      "s": "CLO",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 56.12
+    },
+    {
+      "s": "HYPER",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 47.11
+    },
+    {
+      "s": "OP",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 52.98
+    },
+    {
+      "s": "RENDER",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 47.6
+    },
+    {
+      "s": "SLX",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 58.33
+    },
+    {
+      "s": "STXX",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 74.24
+    },
+    {
+      "s": "BAS",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 30.04
+    },
+    {
+      "s": "BE",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 26.13
+    },
+    {
+      "s": "BR",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 63.42
+    },
+    {
+      "s": "CHZ",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 25.37
+    },
+    {
+      "s": "COLLECT",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 24.16
+    },
+    {
+      "s": "GUA",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 42.16
+    },
+    {
+      "s": "HEMI",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 23.59
+    },
+    {
+      "s": "PLAY",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 51.94
+    },
+    {
+      "s": "ZKP",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 23.85
+    },
+    {
+      "s": "DRAM",
+      "total": 10,
+      "wins": 9,
+      "wr": 90.0,
+      "pnl": 201.09
+    },
+    {
+      "s": "ASR",
+      "total": 9,
+      "wins": 8,
+      "wr": 88.89,
+      "pnl": 206.09
+    },
+    {
+      "s": "BLUAI",
+      "total": 8,
+      "wins": 7,
+      "wr": 87.5,
+      "pnl": 196.21
+    },
+    {
+      "s": "GWEI",
+      "total": 8,
+      "wins": 7,
+      "wr": 87.5,
+      "pnl": 436.04
+    },
+    {
+      "s": "BASED",
+      "total": 27,
+      "wins": 23,
+      "wr": 85.19,
+      "pnl": 678.68
+    },
+    {
+      "s": "MMT",
+      "total": 18,
+      "wins": 15,
+      "wr": 83.33,
+      "pnl": 387.04
+    },
+    {
+      "s": "US",
+      "total": 12,
+      "wins": 10,
+      "wr": 83.33,
+      "pnl": 277.89
+    },
+    {
+      "s": "TRADOOR",
+      "total": 6,
+      "wins": 5,
+      "wr": 83.33,
+      "pnl": 119.19
+    },
+    {
+      "s": "UB",
+      "total": 6,
+      "wins": 5,
+      "wr": 83.33,
+      "pnl": 105.82
+    },
+    {
+      "s": "VELODROME",
+      "total": 11,
+      "wins": 9,
+      "wr": 81.82,
+      "pnl": 297.05
+    },
+    {
+      "s": "EDEN",
+      "total": 5,
+      "wins": 4,
+      "wr": 80.0,
+      "pnl": 123.23
+    },
+    {
+      "s": "XAN",
+      "total": 5,
+      "wins": 4,
+      "wr": 80.0,
+      "pnl": 70.08
+    },
+    {
+      "s": "ALLO",
+      "total": 9,
+      "wins": 7,
+      "wr": 77.78,
+      "pnl": 374.39
+    },
+    {
+      "s": "FHE",
+      "total": 9,
+      "wins": 7,
+      "wr": 77.78,
+      "pnl": 162.18
+    },
+    {
+      "s": "BTW",
+      "total": 37,
+      "wins": 28,
+      "wr": 75.68,
+      "pnl": 914.18
+    },
+    {
+      "s": "IO",
+      "total": 8,
+      "wins": 6,
+      "wr": 75.0,
+      "pnl": 145.92
+    },
+    {
+      "s": "JCT",
+      "total": 8,
+      "wins": 6,
+      "wr": 75.0,
+      "pnl": 278.62
+    },
+    {
+      "s": "FARTCOIN",
+      "total": 4,
+      "wins": 3,
+      "wr": 75.0,
+      "pnl": 65.15
+    },
+    {
+      "s": "RESOLV",
+      "total": 4,
+      "wins": 3,
+      "wr": 75.0,
+      "pnl": 62.97
+    },
+    {
+      "s": "UMA",
+      "total": 4,
+      "wins": 3,
+      "wr": 75.0,
+      "pnl": 56.44
+    },
+    {
+      "s": "LUMIA",
+      "total": 15,
+      "wins": 11,
+      "wr": 73.33,
+      "pnl": 200.13
+    },
+    {
+      "s": "AERO",
+      "total": 11,
+      "wins": 8,
+      "wr": 72.73,
+      "pnl": 167.39
+    },
+    {
+      "s": "EUL",
+      "total": 11,
+      "wins": 8,
+      "wr": 72.73,
+      "pnl": 154.09
+    },
+    {
+      "s": "PENDLE",
+      "total": 7,
+      "wins": 5,
+      "wr": 71.43,
+      "pnl": 76.02
+    },
+    {
+      "s": "XPL",
+      "total": 7,
+      "wins": 5,
+      "wr": 71.43,
+      "pnl": 105.8
+    },
+    {
+      "s": "SWARMS",
+      "total": 16,
+      "wins": 11,
+      "wr": 68.75,
+      "pnl": 170.71
+    },
+    {
+      "s": "KMNO",
+      "total": 9,
+      "wins": 6,
+      "wr": 66.67,
+      "pnl": 86.73
+    },
+    {
+      "s": "SENT",
+      "total": 9,
+      "wins": 6,
+      "wr": 66.67,
+      "pnl": 114.95
+    },
+    {
+      "s": "ZEREBRO",
+      "total": 9,
+      "wins": 6,
+      "wr": 66.67,
+      "pnl": 62.88
+    },
+    {
+      "s": "PORTAL",
+      "total": 6,
+      "wins": 4,
+      "wr": 66.67,
+      "pnl": 61.55
+    },
+    {
+      "s": "TST",
+      "total": 6,
+      "wins": 4,
+      "wr": 66.67,
+      "pnl": 42.53
+    },
+    {
+      "s": "COAI",
+      "total": 3,
+      "wins": 2,
+      "wr": 66.67,
+      "pnl": 157.27
+    },
+    {
+      "s": "DYDX",
+      "total": 3,
+      "wins": 2,
+      "wr": 66.67,
+      "pnl": 24.37
+    },
+    {
+      "s": "LIGHT",
+      "total": 3,
+      "wins": 2,
+      "wr": 66.67,
+      "pnl": 35.58
+    },
+    {
+      "s": "VELVET",
+      "total": 3,
+      "wins": 2,
+      "wr": 66.67,
+      "pnl": 159.67
+    },
+    {
+      "s": "ZEST",
+      "total": 3,
+      "wins": 2,
+      "wr": 66.67,
+      "pnl": 35.1
+    },
+    {
+      "s": "EVAA",
+      "total": 23,
+      "wins": 15,
+      "wr": 65.22,
+      "pnl": -21.04
+    },
+    {
+      "s": "SQD",
+      "total": 23,
+      "wins": 15,
+      "wr": 65.22,
+      "pnl": 166.5
+    },
+    {
+      "s": "BIO",
+      "total": 11,
+      "wins": 7,
+      "wr": 63.64,
+      "pnl": 105.29
+    },
+    {
+      "s": "JTO",
+      "total": 11,
+      "wins": 7,
+      "wr": 63.64,
+      "pnl": 92.99
+    },
+    {
+      "s": "BANK",
+      "total": 8,
+      "wins": 5,
+      "wr": 62.5,
+      "pnl": 172.1
+    },
+    {
+      "s": "EIGEN",
+      "total": 8,
+      "wins": 5,
+      "wr": 62.5,
+      "pnl": 39.43
+    },
+    {
+      "s": "AKT",
+      "total": 5,
+      "wins": 3,
+      "wr": 60.0,
+      "pnl": 65.25
+    },
+    {
+      "s": "BEAT",
+      "total": 7,
+      "wins": 4,
+      "wr": 57.14,
+      "pnl": 254.53
+    },
+    {
+      "s": "WLD",
+      "total": 7,
+      "wins": 4,
+      "wr": 57.14,
+      "pnl": -4.18
+    },
+    {
+      "s": "LAB",
+      "total": 12,
+      "wins": 6,
+      "wr": 50.0,
+      "pnl": -160.66
+    },
+    {
+      "s": "AGT",
+      "total": 8,
+      "wins": 4,
+      "wr": 50.0,
+      "pnl": -63.87
+    },
+    {
+      "s": "CRDO",
+      "total": 8,
+      "wins": 4,
+      "wr": 50.0,
+      "pnl": 50.63
+    },
+    {
+      "s": "JUP",
+      "total": 8,
+      "wins": 4,
+      "wr": 50.0,
+      "pnl": -33.06
+    },
+    {
+      "s": "USELESS",
+      "total": 8,
+      "wins": 4,
+      "wr": 50.0,
+      "pnl": -12.11
+    },
+    {
+      "s": "ENS",
+      "total": 6,
+      "wins": 3,
+      "wr": 50.0,
+      "pnl": -1.32
+    },
+    {
+      "s": "RUNE",
+      "total": 6,
+      "wins": 3,
+      "wr": 50.0,
+      "pnl": 15.04
+    },
+    {
+      "s": "ARKM",
+      "total": 4,
+      "wins": 2,
+      "wr": 50.0,
+      "pnl": -2.55
+    },
+    {
+      "s": "MEGA",
+      "total": 4,
+      "wins": 2,
+      "wr": 50.0,
+      "pnl": -3.97
+    },
+    {
+      "s": "RIF",
+      "total": 4,
+      "wins": 2,
+      "wr": 50.0,
+      "pnl": -0.89
+    },
+    {
+      "s": "AKE",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -0.95
+    },
+    {
+      "s": "BLESS",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -17.11
+    },
+    {
+      "s": "ENA",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -2.23
+    },
+    {
+      "s": "ENJ",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -9.7
+    },
+    {
+      "s": "ID",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": 2.37
+    },
+    {
+      "s": "SUSHI",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -1.54
+    },
+    {
+      "s": "BSB",
+      "total": 9,
+      "wins": 4,
+      "wr": 44.44,
+      "pnl": -40.63
+    },
+    {
+      "s": "MET",
+      "total": 12,
+      "wins": 5,
+      "wr": 41.67,
+      "pnl": -132.82
+    },
+    {
+      "s": "AIOT",
+      "total": 10,
+      "wins": 4,
+      "wr": 40.0,
+      "pnl": -114.8
+    },
+    {
+      "s": "QNTX",
+      "total": 13,
+      "wins": 5,
+      "wr": 38.46,
+      "pnl": -48.49
+    },
+    {
+      "s": "ESPORTS",
+      "total": 8,
+      "wins": 3,
+      "wr": 37.5,
+      "pnl": -173.73
+    },
+    {
+      "s": "CRV",
+      "total": 9,
+      "wins": 3,
+      "wr": 33.33,
+      "pnl": -72.52
+    },
+    {
+      "s": "OPEN",
+      "total": 9,
+      "wins": 3,
+      "wr": 33.33,
+      "pnl": -122.35
+    },
+    {
+      "s": "BEL",
+      "total": 6,
+      "wins": 2,
+      "wr": 33.33,
+      "pnl": -280.6
+    },
+    {
+      "s": "CFG",
+      "total": 6,
+      "wins": 2,
+      "wr": 33.33,
+      "pnl": -63.8
+    },
+    {
+      "s": "GRIFFAIN",
+      "total": 3,
+      "wins": 1,
+      "wr": 33.33,
+      "pnl": -29.87
+    },
+    {
+      "s": "LIT",
+      "total": 3,
+      "wins": 1,
+      "wr": 33.33,
+      "pnl": -37.41
+    },
+    {
+      "s": "POWER",
+      "total": 3,
+      "wins": 1,
+      "wr": 33.33,
+      "pnl": -50.95
+    },
+    {
+      "s": "SKYAI",
+      "total": 3,
+      "wins": 1,
+      "wr": 33.33,
+      "pnl": -39.53
+    },
+    {
+      "s": "SOXL",
+      "total": 3,
+      "wins": 1,
+      "wr": 33.33,
+      "pnl": -58.0
+    },
+    {
+      "s": "AIO",
+      "total": 8,
+      "wins": 2,
+      "wr": 25.0,
+      "pnl": -338.26
+    },
+    {
+      "s": "BRETT",
+      "total": 8,
+      "wins": 2,
+      "wr": 25.0,
+      "pnl": -125.87
+    },
+    {
+      "s": "TIA",
+      "total": 8,
+      "wins": 2,
+      "wr": 25.0,
+      "pnl": -163.11
+    },
+    {
+      "s": "1000CHEEMS",
+      "total": 4,
+      "wins": 1,
+      "wr": 25.0,
+      "pnl": -85.99
+    },
+    {
+      "s": "HMSTR",
+      "total": 4,
+      "wins": 1,
+      "wr": 25.0,
+      "pnl": -258.66
+    },
+    {
+      "s": "HYPE",
+      "total": 5,
+      "wins": 1,
+      "wr": 20.0,
+      "pnl": -123.17
+    },
+    {
+      "s": "ZEC",
+      "total": 11,
+      "wins": 2,
+      "wr": 18.18,
+      "pnl": -275.92
+    },
+    {
+      "s": "RE",
+      "total": 6,
+      "wins": 1,
+      "wr": 16.67,
+      "pnl": -409.17
+    },
+    {
+      "s": "NOT",
+      "total": 7,
+      "wins": 1,
+      "wr": 14.29,
+      "pnl": -199.67
+    },
+    {
+      "s": "FOLKS",
+      "total": 10,
+      "wins": 1,
+      "wr": 10.0,
+      "pnl": -473.53
+    },
+    {
+      "s": "TAKE",
+      "total": 7,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -215.46
+    },
+    {
+      "s": "TAO",
+      "total": 5,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -234.79
+    },
+    {
+      "s": "UNI",
+      "total": 5,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -214.17
+    },
+    {
+      "s": "AAVE",
+      "total": 4,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -124.55
+    },
+    {
+      "s": "OG",
+      "total": 4,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -119.37
+    },
+    {
+      "s": "PIPPIN",
+      "total": 4,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -246.11
+    },
+    {
+      "s": "TRUMP",
+      "total": 4,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -209.39
+    },
+    {
+      "s": "ZRO",
+      "total": 4,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -196.7
+    },
+    {
+      "s": "1000000MOG",
+      "total": 3,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -80.54
+    },
+    {
+      "s": "NEAR",
+      "total": 3,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -103.1
+    },
+    {
+      "s": "SPORTFUN",
+      "total": 3,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -93.24
+    },
+    {
+      "s": "BANANAS31",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -73.59
+    },
+    {
+      "s": "BICO",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -335.92
+    },
+    {
+      "s": "CFX",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -53.8
+    },
+    {
+      "s": "CVX",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -52.99
+    },
+    {
+      "s": "HIMS",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -63.5
+    },
+    {
+      "s": "HOLO",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -53.64
+    },
+    {
+      "s": "INTC",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -54.98
+    },
+    {
+      "s": "JASMY",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -59.35
+    },
+    {
+      "s": "SEI",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -52.81
+    },
+    {
+      "s": "SNDK",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -52.8
+    },
+    {
+      "s": "SPX",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -123.81
+    },
+    {
+      "s": "TRUTH",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -101.58
+    },
+    {
+      "s": "ZAMA",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -54.21
+    },
+    {
+      "s": "ALCH",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -51.43
+    },
+    {
+      "s": "AT",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -26.38
+    },
+    {
+      "s": "AWE",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -26.13
+    },
+    {
+      "s": "AXTI",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -44.17
+    },
+    {
+      "s": "BROCCOLIF3B",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -34.95
+    },
+    {
+      "s": "CARV",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -29.64
+    },
+    {
+      "s": "CLANKER",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -46.13
+    },
+    {
+      "s": "DASH",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -39.34
+    },
+    {
+      "s": "GPS",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -55.45
+    },
+    {
+      "s": "IREN",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -27.54
+    },
+    {
+      "s": "MITO",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -50.71
+    },
+    {
+      "s": "MU",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -32.69
+    },
+    {
+      "s": "ON",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -39.12
+    },
+    {
+      "s": "PHA",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -25.86
+    },
+    {
+      "s": "POPCAT",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -35.25
+    },
+    {
+      "s": "STG",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -159.42
+    },
+    {
+      "s": "XLM",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -42.27
+    }
+  ],
+  "1h": [
+    {
+      "s": "EVAA",
+      "total": 11,
+      "wins": 11,
+      "wr": 100.0,
+      "pnl": 1271.1
+    },
+    {
+      "s": "GPS",
+      "total": 11,
+      "wins": 11,
+      "wr": 100.0,
+      "pnl": 329.6
+    },
+    {
+      "s": "CLO",
+      "total": 10,
+      "wins": 10,
+      "wr": 100.0,
+      "pnl": 552.71
+    },
+    {
+      "s": "HOME",
+      "total": 9,
+      "wins": 9,
+      "wr": 100.0,
+      "pnl": 1036.2
+    },
+    {
+      "s": "H",
+      "total": 8,
+      "wins": 8,
+      "wr": 100.0,
+      "pnl": 1124.48
+    },
+    {
+      "s": "LUMIA",
+      "total": 7,
+      "wins": 7,
+      "wr": 100.0,
+      "pnl": 426.95
+    },
+    {
+      "s": "ARC",
+      "total": 6,
+      "wins": 6,
+      "wr": 100.0,
+      "pnl": 198.14
+    },
+    {
+      "s": "JUP",
+      "total": 6,
+      "wins": 6,
+      "wr": 100.0,
+      "pnl": 215.29
+    },
+    {
+      "s": "BTW",
+      "total": 4,
+      "wins": 4,
+      "wr": 100.0,
+      "pnl": 694.66
+    },
+    {
+      "s": "BEL",
+      "total": 3,
+      "wins": 3,
+      "wr": 100.0,
+      "pnl": 289.0
+    },
+    {
+      "s": "ASR",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 59.0
+    },
+    {
+      "s": "B2",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 55.84
+    },
+    {
+      "s": "CRWV",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 54.71
+    },
+    {
+      "s": "FORM",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 48.0
+    },
+    {
+      "s": "PARTI",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 46.75
+    },
+    {
+      "s": "VELVET",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 548.74
+    },
+    {
+      "s": "DYM",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 30.1
+    },
+    {
+      "s": "ESP",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 26.94
+    },
+    {
+      "s": "FHE",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 35.97
+    },
+    {
+      "s": "MMT",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 85.25
+    },
+    {
+      "s": "QCOM",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 28.85
+    },
+    {
+      "s": "SKHYNIX",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 57.14
+    },
+    {
+      "s": "UAI",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 27.77
+    },
+    {
+      "s": "XPL",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 37.8
+    },
+    {
+      "s": "DEXE",
+      "total": 13,
+      "wins": 12,
+      "wr": 92.31,
+      "pnl": 460.16
+    },
+    {
+      "s": "CATI",
+      "total": 11,
+      "wins": 10,
+      "wr": 90.91,
+      "pnl": 230.68
+    },
+    {
+      "s": "BANK",
+      "total": 10,
+      "wins": 9,
+      "wr": 90.0,
+      "pnl": 215.52
+    },
+    {
+      "s": "BASED",
+      "total": 8,
+      "wins": 7,
+      "wr": 87.5,
+      "pnl": 341.18
+    },
+    {
+      "s": "BE",
+      "total": 8,
+      "wins": 7,
+      "wr": 87.5,
+      "pnl": 224.87
+    },
+    {
+      "s": "SNDK",
+      "total": 8,
+      "wins": 7,
+      "wr": 87.5,
+      "pnl": 193.86
+    },
+    {
+      "s": "VELODROME",
+      "total": 8,
+      "wins": 7,
+      "wr": 87.5,
+      "pnl": 383.92
+    },
+    {
+      "s": "CRDO",
+      "total": 7,
+      "wins": 6,
+      "wr": 85.71,
+      "pnl": 147.8
+    },
+    {
+      "s": "龙虾",
+      "total": 12,
+      "wins": 10,
+      "wr": 83.33,
+      "pnl": 427.0
+    },
+    {
+      "s": "WLD",
+      "total": 30,
+      "wins": 24,
+      "wr": 80.0,
+      "pnl": 865.01
+    },
+    {
+      "s": "AIOT",
+      "total": 5,
+      "wins": 4,
+      "wr": 80.0,
+      "pnl": 200.43
+    },
+    {
+      "s": "AMAT",
+      "total": 5,
+      "wins": 4,
+      "wr": 80.0,
+      "pnl": 121.35
+    },
+    {
+      "s": "JTO",
+      "total": 5,
+      "wins": 4,
+      "wr": 80.0,
+      "pnl": 81.04
+    },
+    {
+      "s": "NEAR",
+      "total": 5,
+      "wins": 4,
+      "wr": 80.0,
+      "pnl": 205.14
+    },
+    {
+      "s": "USAR",
+      "total": 5,
+      "wins": 4,
+      "wr": 80.0,
+      "pnl": 83.42
+    },
+    {
+      "s": "US",
+      "total": 42,
+      "wins": 33,
+      "wr": 78.57,
+      "pnl": 1534.04
+    },
+    {
+      "s": "JCT",
+      "total": 14,
+      "wins": 11,
+      "wr": 78.57,
+      "pnl": 379.79
+    },
+    {
+      "s": "HYPE",
+      "total": 9,
+      "wins": 7,
+      "wr": 77.78,
+      "pnl": 269.58
+    },
+    {
+      "s": "LAB",
+      "total": 9,
+      "wins": 7,
+      "wr": 77.78,
+      "pnl": 579.64
+    },
+    {
+      "s": "MRVL",
+      "total": 17,
+      "wins": 13,
+      "wr": 76.47,
+      "pnl": 460.74
+    },
+    {
+      "s": "COAI",
+      "total": 8,
+      "wins": 6,
+      "wr": 75.0,
+      "pnl": 86.39
+    },
+    {
+      "s": "GLW",
+      "total": 4,
+      "wins": 3,
+      "wr": 75.0,
+      "pnl": 58.44
+    },
+    {
+      "s": "KAITO",
+      "total": 4,
+      "wins": 3,
+      "wr": 75.0,
+      "pnl": 45.84
+    },
+    {
+      "s": "PORTAL",
+      "total": 4,
+      "wins": 3,
+      "wr": 75.0,
+      "pnl": 121.07
+    },
+    {
+      "s": "SOXL",
+      "total": 11,
+      "wins": 8,
+      "wr": 72.73,
+      "pnl": 242.81
+    },
+    {
+      "s": "BLUAI",
+      "total": 7,
+      "wins": 5,
+      "wr": 71.43,
+      "pnl": 112.19
+    },
+    {
+      "s": "FIGHT",
+      "total": 7,
+      "wins": 5,
+      "wr": 71.43,
+      "pnl": 85.5
+    },
+    {
+      "s": "FOLKS",
+      "total": 19,
+      "wins": 13,
+      "wr": 68.42,
+      "pnl": 338.28
+    },
+    {
+      "s": "MAGMA",
+      "total": 9,
+      "wins": 6,
+      "wr": 66.67,
+      "pnl": 11.16
+    },
+    {
+      "s": "HANA",
+      "total": 6,
+      "wins": 4,
+      "wr": 66.67,
+      "pnl": 85.76
+    },
+    {
+      "s": "OPEN",
+      "total": 6,
+      "wins": 4,
+      "wr": 66.67,
+      "pnl": 91.95
+    },
+    {
+      "s": "RIF",
+      "total": 6,
+      "wins": 4,
+      "wr": 66.67,
+      "pnl": 41.24
+    },
+    {
+      "s": "BSB",
+      "total": 3,
+      "wins": 2,
+      "wr": 66.67,
+      "pnl": 140.98
+    },
+    {
+      "s": "IN",
+      "total": 3,
+      "wins": 2,
+      "wr": 66.67,
+      "pnl": -14.04
+    },
+    {
+      "s": "ALLO",
+      "total": 37,
+      "wins": 24,
+      "wr": 64.86,
+      "pnl": 818.29
+    },
+    {
+      "s": "IO",
+      "total": 19,
+      "wins": 12,
+      "wr": 63.16,
+      "pnl": 241.15
+    },
+    {
+      "s": "AKE",
+      "total": 8,
+      "wins": 5,
+      "wr": 62.5,
+      "pnl": -0.93
+    },
+    {
+      "s": "DYDX",
+      "total": 8,
+      "wins": 5,
+      "wr": 62.5,
+      "pnl": 16.0
+    },
+    {
+      "s": "BEAT",
+      "total": 15,
+      "wins": 9,
+      "wr": 60.0,
+      "pnl": -118.95
+    },
+    {
+      "s": "BAS",
+      "total": 10,
+      "wins": 6,
+      "wr": 60.0,
+      "pnl": 56.71
+    },
+    {
+      "s": "INJ",
+      "total": 10,
+      "wins": 6,
+      "wr": 60.0,
+      "pnl": 50.82
+    },
+    {
+      "s": "NIGHT",
+      "total": 10,
+      "wins": 6,
+      "wr": 60.0,
+      "pnl": 64.29
+    },
+    {
+      "s": "AMD",
+      "total": 5,
+      "wins": 3,
+      "wr": 60.0,
+      "pnl": 16.57
+    },
+    {
+      "s": "HEI",
+      "total": 5,
+      "wins": 3,
+      "wr": 60.0,
+      "pnl": 35.92
+    },
+    {
+      "s": "ORCL",
+      "total": 5,
+      "wins": 3,
+      "wr": 60.0,
+      "pnl": 13.95
+    },
+    {
+      "s": "SENT",
+      "total": 5,
+      "wins": 3,
+      "wr": 60.0,
+      "pnl": 30.34
+    },
+    {
+      "s": "C",
+      "total": 7,
+      "wins": 4,
+      "wr": 57.14,
+      "pnl": 10.0
+    },
+    {
+      "s": "EPIC",
+      "total": 7,
+      "wins": 4,
+      "wr": 57.14,
+      "pnl": -44.1
+    },
+    {
+      "s": "APR",
+      "total": 13,
+      "wins": 7,
+      "wr": 53.85,
+      "pnl": 96.81
+    },
+    {
+      "s": "LIT",
+      "total": 28,
+      "wins": 15,
+      "wr": 53.57,
+      "pnl": -56.1
+    },
+    {
+      "s": "FET",
+      "total": 6,
+      "wins": 3,
+      "wr": 50.0,
+      "pnl": 2.72
+    },
+    {
+      "s": "ARM",
+      "total": 4,
+      "wins": 2,
+      "wr": 50.0,
+      "pnl": -6.28
+    },
+    {
+      "s": "BR",
+      "total": 4,
+      "wins": 2,
+      "wr": 50.0,
+      "pnl": 65.78
+    },
+    {
+      "s": "MEME",
+      "total": 4,
+      "wins": 2,
+      "wr": 50.0,
+      "pnl": 2.99
+    },
+    {
+      "s": "MET",
+      "total": 4,
+      "wins": 2,
+      "wr": 50.0,
+      "pnl": -9.03
+    },
+    {
+      "s": "AKT",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -18.31
+    },
+    {
+      "s": "ARKM",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -4.98
+    },
+    {
+      "s": "BLESS",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -36.93
+    },
+    {
+      "s": "EWY",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": 0.29
+    },
+    {
+      "s": "HOOD",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": 9.07
+    },
+    {
+      "s": "MU",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -26.75
+    },
+    {
+      "s": "SPX",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": 1.36
+    },
+    {
+      "s": "WDC",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": 1.25
+    },
+    {
+      "s": "SKYAI",
+      "total": 9,
+      "wins": 4,
+      "wr": 44.44,
+      "pnl": -27.46
+    },
+    {
+      "s": "ZAMA",
+      "total": 7,
+      "wins": 3,
+      "wr": 42.86,
+      "pnl": -3.79
+    },
+    {
+      "s": "KMNO",
+      "total": 5,
+      "wins": 2,
+      "wr": 40.0,
+      "pnl": -59.45
+    },
+    {
+      "s": "GRASS",
+      "total": 13,
+      "wins": 5,
+      "wr": 38.46,
+      "pnl": -282.14
+    },
+    {
+      "s": "TRUTH",
+      "total": 8,
+      "wins": 3,
+      "wr": 37.5,
+      "pnl": -176.56
+    },
+    {
+      "s": "NBIS",
+      "total": 12,
+      "wins": 4,
+      "wr": 33.33,
+      "pnl": -134.37
+    },
+    {
+      "s": "INTC",
+      "total": 9,
+      "wins": 3,
+      "wr": 33.33,
+      "pnl": -96.64
+    },
+    {
+      "s": "SQD",
+      "total": 9,
+      "wins": 3,
+      "wr": 33.33,
+      "pnl": -154.91
+    },
+    {
+      "s": "AT",
+      "total": 3,
+      "wins": 1,
+      "wr": 33.33,
+      "pnl": -29.22
+    },
+    {
+      "s": "TA",
+      "total": 3,
+      "wins": 1,
+      "wr": 33.33,
+      "pnl": -53.41
+    },
+    {
+      "s": "AIO",
+      "total": 7,
+      "wins": 2,
+      "wr": 28.57,
+      "pnl": -307.73
+    },
+    {
+      "s": "DRAM",
+      "total": 7,
+      "wins": 2,
+      "wr": 28.57,
+      "pnl": -136.31
+    },
+    {
+      "s": "AERO",
+      "total": 8,
+      "wins": 2,
+      "wr": 25.0,
+      "pnl": -286.84
+    },
+    {
+      "s": "币安人生",
+      "total": 8,
+      "wins": 2,
+      "wr": 25.0,
+      "pnl": -204.82
+    },
+    {
+      "s": "PHA",
+      "total": 4,
+      "wins": 1,
+      "wr": 25.0,
+      "pnl": -120.78
+    },
+    {
+      "s": "FIDA",
+      "total": 5,
+      "wins": 1,
+      "wr": 20.0,
+      "pnl": -315.45
+    },
+    {
+      "s": "NIL",
+      "total": 6,
+      "wins": 1,
+      "wr": 16.67,
+      "pnl": -281.25
+    },
+    {
+      "s": "GWEI",
+      "total": 9,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -755.25
+    },
+    {
+      "s": "EDEN",
+      "total": 5,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -897.98
+    },
+    {
+      "s": "NXPC",
+      "total": 5,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -198.6
+    },
+    {
+      "s": "VVV",
+      "total": 5,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -230.71
+    },
+    {
+      "s": "ZEREBRO",
+      "total": 5,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -335.95
+    },
+    {
+      "s": "STXX",
+      "total": 4,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -181.01
+    },
+    {
+      "s": "USELESS",
+      "total": 4,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -218.38
+    },
+    {
+      "s": "HIMS",
+      "total": 3,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -125.97
+    },
+    {
+      "s": "METIS",
+      "total": 3,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -111.13
+    },
+    {
+      "s": "PROM",
+      "total": 3,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -82.5
+    },
+    {
+      "s": "CRV",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -66.77
+    },
+    {
+      "s": "EIGEN",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -165.2
+    },
+    {
+      "s": "IDOL",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -84.21
+    },
+    {
+      "s": "RKLB",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -60.61
+    },
+    {
+      "s": "XLM",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -159.56
+    },
+    {
+      "s": "1000LUNC",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -26.7
+    },
+    {
+      "s": "BAN",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -56.91
+    },
+    {
+      "s": "CLANKER",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -26.45
+    },
+    {
+      "s": "ICP",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -33.49
+    },
+    {
+      "s": "KAIA",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -25.9
+    },
+    {
+      "s": "KITE",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -28.37
+    },
+    {
+      "s": "KOMA",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -51.75
+    },
+    {
+      "s": "MORPHO",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -48.08
+    },
+    {
+      "s": "ONDO",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -35.31
+    },
+    {
+      "s": "XAN",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -32.01
+    },
+    {
+      "s": "ZEC",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -44.11
+    }
+  ],
+  "4h": [
+    {
+      "s": "LAB",
+      "total": 22,
+      "wins": 22,
+      "wr": 100.0,
+      "pnl": 4143.55
+    },
+    {
+      "s": "MAGMA",
+      "total": 14,
+      "wins": 14,
+      "wr": 100.0,
+      "pnl": 1371.07
+    },
+    {
+      "s": "SFP",
+      "total": 12,
+      "wins": 12,
+      "wr": 100.0,
+      "pnl": 351.45
+    },
+    {
+      "s": "CTSI",
+      "total": 11,
+      "wins": 11,
+      "wr": 100.0,
+      "pnl": 381.0
+    },
+    {
+      "s": "MU",
+      "total": 10,
+      "wins": 10,
+      "wr": 100.0,
+      "pnl": 1028.04
+    },
+    {
+      "s": "SAHARA",
+      "total": 10,
+      "wins": 10,
+      "wr": 100.0,
+      "pnl": 549.64
+    },
+    {
+      "s": "SNDK",
+      "total": 10,
+      "wins": 10,
+      "wr": 100.0,
+      "pnl": 934.98
+    },
+    {
+      "s": "US",
+      "total": 10,
+      "wins": 10,
+      "wr": 100.0,
+      "pnl": 432.34
+    },
+    {
+      "s": "PENDLE",
+      "total": 7,
+      "wins": 7,
+      "wr": 100.0,
+      "pnl": 591.0
+    },
+    {
+      "s": "ZEC",
+      "total": 7,
+      "wins": 7,
+      "wr": 100.0,
+      "pnl": 702.66
+    },
+    {
+      "s": "AMD",
+      "total": 6,
+      "wins": 6,
+      "wr": 100.0,
+      "pnl": 194.62
+    },
+    {
+      "s": "JST",
+      "total": 6,
+      "wins": 6,
+      "wr": 100.0,
+      "pnl": 395.96
+    },
+    {
+      "s": "LIT",
+      "total": 6,
+      "wins": 6,
+      "wr": 100.0,
+      "pnl": 489.3
+    },
+    {
+      "s": "NMR",
+      "total": 6,
+      "wins": 6,
+      "wr": 100.0,
+      "pnl": 175.29
+    },
+    {
+      "s": "SUN",
+      "total": 6,
+      "wins": 6,
+      "wr": 100.0,
+      "pnl": 160.0
+    },
+    {
+      "s": "BNT",
+      "total": 5,
+      "wins": 5,
+      "wr": 100.0,
+      "pnl": 125.03
+    },
+    {
+      "s": "FET",
+      "total": 5,
+      "wins": 5,
+      "wr": 100.0,
+      "pnl": 220.7
+    },
+    {
+      "s": "AERO",
+      "total": 4,
+      "wins": 4,
+      "wr": 100.0,
+      "pnl": 141.48
+    },
+    {
+      "s": "COMP",
+      "total": 4,
+      "wins": 4,
+      "wr": 100.0,
+      "pnl": 152.93
+    },
+    {
+      "s": "RAVE",
+      "total": 4,
+      "wins": 4,
+      "wr": 100.0,
+      "pnl": 113.67
+    },
+    {
+      "s": "AAPL",
+      "total": 3,
+      "wins": 3,
+      "wr": 100.0,
+      "pnl": 75.22
+    },
+    {
+      "s": "BAN",
+      "total": 3,
+      "wins": 3,
+      "wr": 100.0,
+      "pnl": 194.06
+    },
+    {
+      "s": "BTCDOM",
+      "total": 3,
+      "wins": 3,
+      "wr": 100.0,
+      "pnl": 76.53
+    },
+    {
+      "s": "BTR",
+      "total": 3,
+      "wins": 3,
+      "wr": 100.0,
+      "pnl": 421.49
+    },
+    {
+      "s": "DODOX",
+      "total": 3,
+      "wins": 3,
+      "wr": 100.0,
+      "pnl": 117.85
+    },
+    {
+      "s": "SKYAI",
+      "total": 3,
+      "wins": 3,
+      "wr": 100.0,
+      "pnl": 589.47
+    },
+    {
+      "s": "BTC",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 51.31
+    },
+    {
+      "s": "CHIP",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 195.81
+    },
+    {
+      "s": "COIN",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 76.88
+    },
+    {
+      "s": "FOLKS",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 185.55
+    },
+    {
+      "s": "ILV",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 89.07
+    },
+    {
+      "s": "MSTR",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 125.28
+    },
+    {
+      "s": "币安人生",
+      "total": 2,
+      "wins": 2,
+      "wr": 100.0,
+      "pnl": 283.34
+    },
+    {
+      "s": "2Z",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 31.64
+    },
+    {
+      "s": "ARIA",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 239.15
+    },
+    {
+      "s": "ASTR",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 33.38
+    },
+    {
+      "s": "BB",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 23.89
+    },
+    {
+      "s": "CETUS",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 75.17
+    },
+    {
+      "s": "COAI",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 37.48
+    },
+    {
+      "s": "EVAA",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 36.79
+    },
+    {
+      "s": "FIGHT",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 47.29
+    },
+    {
+      "s": "HOME",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 76.93
+    },
+    {
+      "s": "METIS",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 39.05
+    },
+    {
+      "s": "NEWT",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 26.48
+    },
+    {
+      "s": "NOT",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 36.23
+    },
+    {
+      "s": "PEOPLE",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 36.65
+    },
+    {
+      "s": "POWER",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 109.41
+    },
+    {
+      "s": "PRL",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 109.59
+    },
+    {
+      "s": "TAKE",
+      "total": 1,
+      "wins": 1,
+      "wr": 100.0,
+      "pnl": 51.19
+    },
+    {
+      "s": "VVV",
+      "total": 31,
+      "wins": 29,
+      "wr": 93.55,
+      "pnl": 2573.25
+    },
+    {
+      "s": "RENDER",
+      "total": 14,
+      "wins": 13,
+      "wr": 92.86,
+      "pnl": 431.52
+    },
+    {
+      "s": "EDGE",
+      "total": 13,
+      "wins": 12,
+      "wr": 92.31,
+      "pnl": 843.73
+    },
+    {
+      "s": "JTO",
+      "total": 13,
+      "wins": 12,
+      "wr": 92.31,
+      "pnl": 908.07
+    },
+    {
+      "s": "1000LUNC",
+      "total": 12,
+      "wins": 11,
+      "wr": 91.67,
+      "pnl": 953.01
+    },
+    {
+      "s": "IDOL",
+      "total": 12,
+      "wins": 11,
+      "wr": 91.67,
+      "pnl": 380.17
+    },
+    {
+      "s": "ARKM",
+      "total": 11,
+      "wins": 10,
+      "wr": 90.91,
+      "pnl": 347.18
+    },
+    {
+      "s": "SIREN",
+      "total": 11,
+      "wins": 10,
+      "wr": 90.91,
+      "pnl": 1146.05
+    },
+    {
+      "s": "JELLYJELLY",
+      "total": 9,
+      "wins": 8,
+      "wr": 88.89,
+      "pnl": 191.8
+    },
+    {
+      "s": "KITE",
+      "total": 9,
+      "wins": 8,
+      "wr": 88.89,
+      "pnl": 486.32
+    },
+    {
+      "s": "MANTA",
+      "total": 16,
+      "wins": 14,
+      "wr": 87.5,
+      "pnl": 318.77
+    },
+    {
+      "s": "KAITO",
+      "total": 7,
+      "wins": 6,
+      "wr": 85.71,
+      "pnl": 140.81
+    },
+    {
+      "s": "UAI",
+      "total": 7,
+      "wins": 6,
+      "wr": 85.71,
+      "pnl": 300.1
+    },
+    {
+      "s": "TAC",
+      "total": 13,
+      "wins": 11,
+      "wr": 84.62,
+      "pnl": 1068.18
+    },
+    {
+      "s": "VELVET",
+      "total": 13,
+      "wins": 11,
+      "wr": 84.62,
+      "pnl": 2338.25
+    },
+    {
+      "s": "APR",
+      "total": 18,
+      "wins": 15,
+      "wr": 83.33,
+      "pnl": 850.41
+    },
+    {
+      "s": "TRADOOR",
+      "total": 6,
+      "wins": 5,
+      "wr": 83.33,
+      "pnl": 493.73
+    },
+    {
+      "s": "UB",
+      "total": 6,
+      "wins": 5,
+      "wr": 83.33,
+      "pnl": 666.99
+    },
+    {
+      "s": "PHA",
+      "total": 11,
+      "wins": 9,
+      "wr": 81.82,
+      "pnl": 225.51
+    },
+    {
+      "s": "BR",
+      "total": 10,
+      "wins": 8,
+      "wr": 80.0,
+      "pnl": 771.88
+    },
+    {
+      "s": "BSB",
+      "total": 10,
+      "wins": 8,
+      "wr": 80.0,
+      "pnl": 1152.0
+    },
+    {
+      "s": "BOME",
+      "total": 5,
+      "wins": 4,
+      "wr": 80.0,
+      "pnl": 194.02
+    },
+    {
+      "s": "FLOCK",
+      "total": 5,
+      "wins": 4,
+      "wr": 80.0,
+      "pnl": 92.81
+    },
+    {
+      "s": "NATGAS",
+      "total": 5,
+      "wins": 4,
+      "wr": 80.0,
+      "pnl": 78.04
+    },
+    {
+      "s": "POLYX",
+      "total": 5,
+      "wins": 4,
+      "wr": 80.0,
+      "pnl": 73.56
+    },
+    {
+      "s": "DUSK",
+      "total": 13,
+      "wins": 10,
+      "wr": 76.92,
+      "pnl": 181.55
+    },
+    {
+      "s": "TAG",
+      "total": 17,
+      "wins": 13,
+      "wr": 76.47,
+      "pnl": 641.03
+    },
+    {
+      "s": "BAS",
+      "total": 21,
+      "wins": 16,
+      "wr": 76.19,
+      "pnl": 1573.28
+    },
+    {
+      "s": "NAORIS",
+      "total": 21,
+      "wins": 16,
+      "wr": 76.19,
+      "pnl": 1338.73
+    },
+    {
+      "s": "C",
+      "total": 25,
+      "wins": 19,
+      "wr": 76.0,
+      "pnl": 451.21
+    },
+    {
+      "s": "BABY",
+      "total": 4,
+      "wins": 3,
+      "wr": 75.0,
+      "pnl": 134.08
+    },
+    {
+      "s": "ENSO",
+      "total": 4,
+      "wins": 3,
+      "wr": 75.0,
+      "pnl": 74.83
+    },
+    {
+      "s": "GRIFFAIN",
+      "total": 4,
+      "wins": 3,
+      "wr": 75.0,
+      "pnl": 194.11
+    },
+    {
+      "s": "LYN",
+      "total": 4,
+      "wins": 3,
+      "wr": 75.0,
+      "pnl": 334.6
+    },
+    {
+      "s": "PENGU",
+      "total": 4,
+      "wins": 3,
+      "wr": 75.0,
+      "pnl": 67.48
+    },
+    {
+      "s": "ZRO",
+      "total": 4,
+      "wins": 3,
+      "wr": 75.0,
+      "pnl": 85.55
+    },
+    {
+      "s": "AGT",
+      "total": 22,
+      "wins": 16,
+      "wr": 72.73,
+      "pnl": 672.4
+    },
+    {
+      "s": "USELESS",
+      "total": 11,
+      "wins": 8,
+      "wr": 72.73,
+      "pnl": 361.29
+    },
+    {
+      "s": "BLUAI",
+      "total": 21,
+      "wins": 15,
+      "wr": 71.43,
+      "pnl": 432.35
+    },
+    {
+      "s": "CFG",
+      "total": 7,
+      "wins": 5,
+      "wr": 71.43,
+      "pnl": 250.13
+    },
+    {
+      "s": "CRCL",
+      "total": 7,
+      "wins": 5,
+      "wr": 71.43,
+      "pnl": 86.95
+    },
+    {
+      "s": "H",
+      "total": 7,
+      "wins": 5,
+      "wr": 71.43,
+      "pnl": 361.91
+    },
+    {
+      "s": "KERNEL",
+      "total": 7,
+      "wins": 5,
+      "wr": 71.43,
+      "pnl": 155.63
+    },
+    {
+      "s": "NXPC",
+      "total": 7,
+      "wins": 5,
+      "wr": 71.43,
+      "pnl": 54.31
+    },
+    {
+      "s": "PNUT",
+      "total": 7,
+      "wins": 5,
+      "wr": 71.43,
+      "pnl": 187.99
+    },
+    {
+      "s": "XNY",
+      "total": 23,
+      "wins": 16,
+      "wr": 69.57,
+      "pnl": 448.82
+    },
+    {
+      "s": "DEXE",
+      "total": 13,
+      "wins": 9,
+      "wr": 69.23,
+      "pnl": 414.16
+    },
+    {
+      "s": "IO",
+      "total": 13,
+      "wins": 9,
+      "wr": 69.23,
+      "pnl": 189.44
+    },
+    {
+      "s": "JCT",
+      "total": 21,
+      "wins": 14,
+      "wr": 66.67,
+      "pnl": 44.27
+    },
+    {
+      "s": "INTC",
+      "total": 15,
+      "wins": 10,
+      "wr": 66.67,
+      "pnl": 490.26
+    },
+    {
+      "s": "GUA",
+      "total": 12,
+      "wins": 8,
+      "wr": 66.67,
+      "pnl": 433.9
+    },
+    {
+      "s": "BROCCOLIF3B",
+      "total": 9,
+      "wins": 6,
+      "wr": 66.67,
+      "pnl": 70.96
+    },
+    {
+      "s": "HYPER",
+      "total": 6,
+      "wins": 4,
+      "wr": 66.67,
+      "pnl": 45.94
+    },
+    {
+      "s": "TIA",
+      "total": 6,
+      "wins": 4,
+      "wr": 66.67,
+      "pnl": 74.89
+    },
+    {
+      "s": "B",
+      "total": 3,
+      "wins": 2,
+      "wr": 66.67,
+      "pnl": 32.98
+    },
+    {
+      "s": "BEAT",
+      "total": 3,
+      "wins": 2,
+      "wr": 66.67,
+      "pnl": -210.75
+    },
+    {
+      "s": "QCOM",
+      "total": 3,
+      "wins": 2,
+      "wr": 66.67,
+      "pnl": 49.14
+    },
+    {
+      "s": "HYPE",
+      "total": 29,
+      "wins": 19,
+      "wr": 65.52,
+      "pnl": 142.71
+    },
+    {
+      "s": "AIN",
+      "total": 11,
+      "wins": 7,
+      "wr": 63.64,
+      "pnl": 207.48
+    },
+    {
+      "s": "AIXBT",
+      "total": 11,
+      "wins": 7,
+      "wr": 63.64,
+      "pnl": 219.41
+    },
+    {
+      "s": "TSM",
+      "total": 11,
+      "wins": 7,
+      "wr": 63.64,
+      "pnl": 90.15
+    },
+    {
+      "s": "AMZN",
+      "total": 8,
+      "wins": 5,
+      "wr": 62.5,
+      "pnl": 5.91
+    },
+    {
+      "s": "CYS",
+      "total": 8,
+      "wins": 5,
+      "wr": 62.5,
+      "pnl": 55.86
+    },
+    {
+      "s": "GRASS",
+      "total": 8,
+      "wins": 5,
+      "wr": 62.5,
+      "pnl": 60.53
+    },
+    {
+      "s": "HUMA",
+      "total": 8,
+      "wins": 5,
+      "wr": 62.5,
+      "pnl": 67.2
+    },
+    {
+      "s": "TST",
+      "total": 10,
+      "wins": 6,
+      "wr": 60.0,
+      "pnl": 332.53
+    },
+    {
+      "s": "CC",
+      "total": 5,
+      "wins": 3,
+      "wr": 60.0,
+      "pnl": 18.51
+    },
+    {
+      "s": "GTC",
+      "total": 5,
+      "wins": 3,
+      "wr": 60.0,
+      "pnl": 8.13
+    },
+    {
+      "s": "ONDO",
+      "total": 5,
+      "wins": 3,
+      "wr": 60.0,
+      "pnl": 47.99
+    },
+    {
+      "s": "TRUTH",
+      "total": 5,
+      "wins": 3,
+      "wr": 60.0,
+      "pnl": 26.35
+    },
+    {
+      "s": "ARC",
+      "total": 17,
+      "wins": 10,
+      "wr": 58.82,
+      "pnl": 251.08
+    },
+    {
+      "s": "TA",
+      "total": 17,
+      "wins": 10,
+      "wr": 58.82,
+      "pnl": 151.62
+    },
+    {
+      "s": "HANA",
+      "total": 28,
+      "wins": 16,
+      "wr": 57.14,
+      "pnl": 761.28
+    },
+    {
+      "s": "DASH",
+      "total": 7,
+      "wins": 4,
+      "wr": 57.14,
+      "pnl": 82.39
+    },
+    {
+      "s": "SPORTFUN",
+      "total": 7,
+      "wins": 4,
+      "wr": 57.14,
+      "pnl": 45.34
+    },
+    {
+      "s": "EWY",
+      "total": 9,
+      "wins": 5,
+      "wr": 55.56,
+      "pnl": 54.25
+    },
+    {
+      "s": "MORPHO",
+      "total": 9,
+      "wins": 5,
+      "wr": 55.56,
+      "pnl": -75.08
+    },
+    {
+      "s": "RIF",
+      "total": 9,
+      "wins": 5,
+      "wr": 55.56,
+      "pnl": 30.78
+    },
+    {
+      "s": "STABLE",
+      "total": 25,
+      "wins": 13,
+      "wr": 52.0,
+      "pnl": -137.67
+    },
+    {
+      "s": "STG",
+      "total": 14,
+      "wins": 7,
+      "wr": 50.0,
+      "pnl": -45.95
+    },
+    {
+      "s": "M",
+      "total": 8,
+      "wins": 4,
+      "wr": 50.0,
+      "pnl": -51.56
+    },
+    {
+      "s": "ZAMA",
+      "total": 8,
+      "wins": 4,
+      "wr": 50.0,
+      "pnl": -9.76
+    },
+    {
+      "s": "AR",
+      "total": 6,
+      "wins": 3,
+      "wr": 50.0,
+      "pnl": -12.29
+    },
+    {
+      "s": "CHILLGUY",
+      "total": 6,
+      "wins": 3,
+      "wr": 50.0,
+      "pnl": 4.25
+    },
+    {
+      "s": "MON",
+      "total": 6,
+      "wins": 3,
+      "wr": 50.0,
+      "pnl": 61.8
+    },
+    {
+      "s": "AIOT",
+      "total": 4,
+      "wins": 2,
+      "wr": 50.0,
+      "pnl": 91.42
+    },
+    {
+      "s": "BLUR",
+      "total": 4,
+      "wins": 2,
+      "wr": 50.0,
+      "pnl": -0.35
+    },
+    {
+      "s": "FIDA",
+      "total": 4,
+      "wins": 2,
+      "wr": 50.0,
+      "pnl": -4.44
+    },
+    {
+      "s": "NVDA",
+      "total": 4,
+      "wins": 2,
+      "wr": 50.0,
+      "pnl": -3.48
+    },
+    {
+      "s": "RAYSOL",
+      "total": 4,
+      "wins": 2,
+      "wr": 50.0,
+      "pnl": -63.27
+    },
+    {
+      "s": "1000PEPE",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -1.86
+    },
+    {
+      "s": "ATOM",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -6.15
+    },
+    {
+      "s": "CHZ",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -1.84
+    },
+    {
+      "s": "MYX",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -13.23
+    },
+    {
+      "s": "OPEN",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": 35.27
+    },
+    {
+      "s": "RECALL",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -2.04
+    },
+    {
+      "s": "THETA",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -1.32
+    },
+    {
+      "s": "VELODROME",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -1.78
+    },
+    {
+      "s": "XMR",
+      "total": 2,
+      "wins": 1,
+      "wr": 50.0,
+      "pnl": -6.37
+    },
+    {
+      "s": "PLAY",
+      "total": 17,
+      "wins": 8,
+      "wr": 47.06,
+      "pnl": 204.16
+    },
+    {
+      "s": "1000CHEEMS",
+      "total": 9,
+      "wins": 4,
+      "wr": 44.44,
+      "pnl": -71.06
+    },
+    {
+      "s": "Q",
+      "total": 7,
+      "wins": 3,
+      "wr": 42.86,
+      "pnl": -127.17
+    },
+    {
+      "s": "NEAR",
+      "total": 12,
+      "wins": 5,
+      "wr": 41.67,
+      "pnl": -239.33
+    },
+    {
+      "s": "OG",
+      "total": 5,
+      "wins": 2,
+      "wr": 40.0,
+      "pnl": -35.02
+    },
+    {
+      "s": "PLUME",
+      "total": 5,
+      "wins": 2,
+      "wr": 40.0,
+      "pnl": -83.56
+    },
+    {
+      "s": "XAN",
+      "total": 5,
+      "wins": 2,
+      "wr": 40.0,
+      "pnl": -58.08
+    },
+    {
+      "s": "AKT",
+      "total": 11,
+      "wins": 4,
+      "wr": 36.36,
+      "pnl": -257.7
+    },
+    {
+      "s": "DYDX",
+      "total": 11,
+      "wins": 4,
+      "wr": 36.36,
+      "pnl": -223.95
+    },
+    {
+      "s": "SKY",
+      "total": 17,
+      "wins": 6,
+      "wr": 35.29,
+      "pnl": -166.37
+    },
+    {
+      "s": "NEIRO",
+      "total": 9,
+      "wins": 3,
+      "wr": 33.33,
+      "pnl": -160.92
+    },
+    {
+      "s": "B2",
+      "total": 3,
+      "wins": 1,
+      "wr": 33.33,
+      "pnl": -49.37
+    },
+    {
+      "s": "EIGEN",
+      "total": 3,
+      "wins": 1,
+      "wr": 33.33,
+      "pnl": -38.56
+    },
+    {
+      "s": "FHE",
+      "total": 3,
+      "wins": 1,
+      "wr": 33.33,
+      "pnl": -156.44
+    },
+    {
+      "s": "LDO",
+      "total": 3,
+      "wins": 1,
+      "wr": 33.33,
+      "pnl": -36.94
+    },
+    {
+      "s": "NIL",
+      "total": 3,
+      "wins": 1,
+      "wr": 33.33,
+      "pnl": -85.66
+    },
+    {
+      "s": "ON",
+      "total": 3,
+      "wins": 1,
+      "wr": 33.33,
+      "pnl": -33.23
+    },
+    {
+      "s": "GWEI",
+      "total": 7,
+      "wins": 2,
+      "wr": 28.57,
+      "pnl": -137.3
+    },
+    {
+      "s": "INJ",
+      "total": 7,
+      "wins": 2,
+      "wr": 28.57,
+      "pnl": -277.43
+    },
+    {
+      "s": "ALLO",
+      "total": 4,
+      "wins": 1,
+      "wr": 25.0,
+      "pnl": -112.09
+    },
+    {
+      "s": "FLUX",
+      "total": 4,
+      "wins": 1,
+      "wr": 25.0,
+      "pnl": -112.69
+    },
+    {
+      "s": "SPX",
+      "total": 4,
+      "wins": 1,
+      "wr": 25.0,
+      "pnl": -71.74
+    },
+    {
+      "s": "ZEREBRO",
+      "total": 9,
+      "wins": 2,
+      "wr": 22.22,
+      "pnl": -314.09
+    },
+    {
+      "s": "1000000BOB",
+      "total": 5,
+      "wins": 1,
+      "wr": 20.0,
+      "pnl": -209.17
+    },
+    {
+      "s": "ALGO",
+      "total": 5,
+      "wins": 1,
+      "wr": 20.0,
+      "pnl": -128.56
+    },
+    {
+      "s": "JUP",
+      "total": 5,
+      "wins": 1,
+      "wr": 20.0,
+      "pnl": -178.29
+    },
+    {
+      "s": "SAFE",
+      "total": 5,
+      "wins": 1,
+      "wr": 20.0,
+      "pnl": -149.54
+    },
+    {
+      "s": "SAPIEN",
+      "total": 5,
+      "wins": 1,
+      "wr": 20.0,
+      "pnl": -236.2
+    },
+    {
+      "s": "TRIA",
+      "total": 7,
+      "wins": 1,
+      "wr": 14.29,
+      "pnl": -338.95
+    },
+    {
+      "s": "DOGS",
+      "total": 10,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -1234.07
+    },
+    {
+      "s": "GOOGL",
+      "total": 9,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -385.14
+    },
+    {
+      "s": "ZBT",
+      "total": 7,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -678.17
+    },
+    {
+      "s": "HOLO",
+      "total": 6,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -312.04
+    },
+    {
+      "s": "BANANAS31",
+      "total": 5,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -398.12
+    },
+    {
+      "s": "ONT",
+      "total": 5,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -375.34
+    },
+    {
+      "s": "PIEVERSE",
+      "total": 4,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -253.95
+    },
+    {
+      "s": "THE",
+      "total": 4,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -124.16
+    },
+    {
+      "s": "INIT",
+      "total": 3,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -130.39
+    },
+    {
+      "s": "MTL",
+      "total": 3,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -89.61
+    },
+    {
+      "s": "TUT",
+      "total": 3,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -187.68
+    },
+    {
+      "s": "1000CAT",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -94.8
+    },
+    {
+      "s": "1000SATS",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -100.42
+    },
+    {
+      "s": "ALL",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -60.45
+    },
+    {
+      "s": "API3",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -105.66
+    },
+    {
+      "s": "ARB",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -96.02
+    },
+    {
+      "s": "ARPA",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -74.94
+    },
+    {
+      "s": "AVA",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -121.86
+    },
+    {
+      "s": "BIO",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -297.38
+    },
+    {
+      "s": "CFX",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -86.51
+    },
+    {
+      "s": "GIGGLE",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -88.79
+    },
+    {
+      "s": "KSM",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -52.6
+    },
+    {
+      "s": "POPCAT",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -103.3
+    },
+    {
+      "s": "RLC",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -61.84
+    },
+    {
+      "s": "SLP",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -93.94
+    },
+    {
+      "s": "TURTLE",
+      "total": 2,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -102.59
+    },
+    {
+      "s": "AIO",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -55.54
+    },
+    {
+      "s": "APE",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -54.25
+    },
+    {
+      "s": "AZTEC",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -27.43
+    },
+    {
+      "s": "BEL",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -31.26
+    },
+    {
+      "s": "CELO",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -34.1
+    },
+    {
+      "s": "CGPT",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -99.25
+    },
+    {
+      "s": "CHR",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -31.2
+    },
+    {
+      "s": "EDEN",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -190.66
+    },
+    {
+      "s": "ENJ",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -26.01
+    },
+    {
+      "s": "EUL",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -67.52
+    },
+    {
+      "s": "HAEDAL",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -41.13
+    },
+    {
+      "s": "HOOD",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -63.62
+    },
+    {
+      "s": "IRYS",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -130.64
+    },
+    {
+      "s": "JOE",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -30.39
+    },
+    {
+      "s": "LUMIA",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -103.02
+    },
+    {
+      "s": "MOVR",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -69.9
+    },
+    {
+      "s": "NEO",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -27.14
+    },
+    {
+      "s": "ORCA",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -50.71
+    },
+    {
+      "s": "ORDI",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -112.76
+    },
+    {
+      "s": "RSR",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -46.38
+    },
+    {
+      "s": "SCRT",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -45.04
+    },
+    {
+      "s": "SHELL",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -45.1
+    },
+    {
+      "s": "SOON",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -38.35
+    },
+    {
+      "s": "SWARMS",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -162.09
+    },
+    {
+      "s": "TAO",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -85.41
+    },
+    {
+      "s": "TLM",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -36.94
+    },
+    {
+      "s": "TRB",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -50.79
+    },
+    {
+      "s": "USTC",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -84.38
+    },
+    {
+      "s": "WLD",
+      "total": 1,
+      "wins": 0,
+      "wr": 0.0,
+      "pnl": -138.8
+    }
+  ]
+};
+
+let currentTF = '30m';
+let currentTFRank = '30m';
+let currentFilter = 'all';
+let currentSearch = '';
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').style.display = 'flex';
+});
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').style.display = 'none';
+});
+
+function installApp(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; });
+  } else {
+    alert('📲 iOS：請點下方分享按鈕 → 加入主畫面\nAndroid：請點瀏覽器選單 → 安裝應用程式');
+  }
+}
+
+function renderHome(tf){
+  const s = TF_STATS[tf];
+  if(!s) return;
+
+  const cap = s.final_capital.toLocaleString('zh-TW',{maximumFractionDigits:0});
+  const profit = s.total_pnl_u >= 0 ? '+'+s.total_pnl_u.toLocaleString('zh-TW',{maximumFractionDigits:2}) : s.total_pnl_u.toLocaleString();
+  const pct = ((s.final_capital - s.capital)/s.capital*100).toFixed(1);
+  const feeStr = s.total_fee_u.toFixed(0);
+
+  document.getElementById('h_finalCap').textContent = cap + ' U';
+  document.getElementById('h_capSub').textContent = `本金 ${s.capital.toLocaleString()}U → 獲利 +${pct}% ↑`;
+  document.getElementById('h_winRate').textContent = s.win_rate.toFixed(1) + '%';
+  document.getElementById('h_winSub').textContent = `${s.total_wins} 勝 / ${s.total_closed} 筆`;
+  document.getElementById('h_rr').textContent = s.rr_ratio.toFixed(2) + 'x';
+  document.getElementById('h_pnl').textContent = profit + ' U';
+  document.getElementById('h_feeSub').textContent = `手續費 ${feeStr}U 已扣`;
+  document.getElementById('h_syms').textContent = s.symbols_tested;
+  document.getElementById('h_sigSub').textContent = `有效訊號 ${s.total_signals} 筆`;
+  document.getElementById('d_tf').textContent = {
+    '30m':'30分鐘K線','1h':'1小時K線','4h':'4小時K線'
+  }[tf];
+  document.getElementById('d_fee').textContent = feeStr + ' U';
+  document.getElementById('d_avgWin').textContent = '+' + s.avg_win_u.toFixed(2) + ' U';
+  document.getElementById('d_avgLoss').textContent = s.avg_loss_u.toFixed(2) + ' U';
+
+  const wr = s.win_rate.toFixed(1)+'%';
+  const slr = s.sl_rate.toFixed(1)+'%';
+  document.getElementById('tp_winRate').textContent = wr;
+  document.getElementById('tp_winBar').style.width = s.win_rate+'%';
+  document.getElementById('tp_winCount').textContent = `${s.tp_count} 筆止盈`;
+  document.getElementById('tp_slRate').textContent = slr;
+  document.getElementById('tp_slBar').style.width = s.sl_rate+'%';
+  document.getElementById('tp_slCount').textContent = `${s.sl_count} 筆止損`;
+  document.getElementById('tp_total').textContent = s.total_closed;
+  document.getElementById('tp_avgWin').textContent = '+' + s.avg_win_u.toFixed(1) + 'U';
+  document.getElementById('tp_avgLoss').textContent = `平均虧損 ${s.avg_loss_u.toFixed(1)}U/筆`;
+}
+
+function switchTF(tf, btn){
+  currentTF = tf;
+  document.querySelectorAll('#page-home .tf-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHome(tf);
+}
+
+function switchTFRank(tf, btn){
+  currentTFRank = tf;
+  document.querySelectorAll('#page-rank .tf-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = 'all';
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn')[0].classList.add('active');
+  renderRank();
+}
+
+function getFilteredData(){
+  let data = [...(TF_COINS[currentTFRank]||[])];
+  if(currentFilter === 'win80') data = data.filter(d=>d.wr>=80);
+  else if(currentFilter === 'win60') data = data.filter(d=>d.wr>=60);
+  else if(currentFilter === 'pnl') data = data.sort((a,b)=>b.pnl-a.pnl);
+  else if(currentFilter === 'loss') data = data.filter(d=>d.pnl<0).sort((a,b)=>a.pnl-b.pnl);
+  else data = data.sort((a,b)=>b.wr-a.wr||b.total-a.total);
+  if(currentSearch){
+    const q = currentSearch.toUpperCase();
+    data = data.filter(d=>d.s.toUpperCase().includes(q));
+  }
+  return data;
+}
+
+function renderRank(){
+  const data = getFilteredData();
+  const list = document.getElementById('rankList');
+  if(!data.length){
+    list.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">找不到符合幣種</div>';
+    return;
+  }
+  list.innerHTML = data.map((d,i)=>{
+    const nc = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const pc = d.pnl>=0?'pos':'neg';
+    const ps = (d.pnl>=0?'+':'')+d.pnl.toFixed(2)+' U';
+    const wc = d.wr>=70?'var(--green)':d.wr>=50?'var(--amber)':'var(--red)';
+    return `<div class="rank-item">
+      <div class="rank-num ${nc}">${i+1}</div>
+      <div class="rank-body">
+        <div class="rank-sym">${d.s}/USDT</div>
+        <div class="rank-meta">${d.total} 筆 · 勝 ${d.wins} 負 ${d.total-d.wins}</div>
+      </div>
+      <div class="rank-right">
+        <div class="rank-wr" style="color:${wc}">${d.wr}%</div>
+        <div class="rank-pnl ${pc}">${ps}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterRank(type, btn){
+  currentFilter = type;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRank();
+}
+
+function searchRank(val){
+  currentSearch = val;
+  renderRank();
+}
+
+function switchPage(name, el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  el.classList.add('active');
+  if(name==='rank') renderRank();
+  window.scrollTo(0,0);
+}
+
+renderHome('30m');
+renderRank();
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js', {scope: './'}).catch(()=>{});
+}
+</script>
+</body>
+</html>
