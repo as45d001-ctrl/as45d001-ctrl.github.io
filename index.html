@@ -128,7 +128,7 @@ body{font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;back
     <div class="header-eyebrow">Binance Futures × OrangeX · 2年回測</div>
     <h1>趨勢贏家<br><span>回測報告</span></h1>
     <p class="header-sub">636 個合約 · 本金 10,000U · 手續費 0.06%</p>
-    <div class="live-badge"><div class="live-dot"></div>最後更新：2026-07-01</div>
+    <div class="live-badge"><div class="live-dot"></div>最後更新：2026-07-02</div>
   </div>
 
   <div id="installBanner" class="install-banner" style="display:none">
@@ -321,901 +321,101 @@ const TF_STATS = {
   "30m": {
     "timeframe": "30m",
     "capital": 10000.0,
-    "symbols_tested": 172,
-    "total_signals": 301,
-    "total_closed": 297,
-    "total_wins": 178,
-    "win_rate": 59.93,
-    "tp_count": 178,
-    "sl_count": 119,
-    "tp_rate": 59.93,
-    "sl_rate": 40.07,
-    "total_pnl_u": 2273.61,
-    "total_fee_u": 361.2,
-    "final_capital": 12273.61,
-    "avg_win_u": 41.86,
-    "avg_loss_u": -43.51,
-    "rr_ratio": 0.9621
+    "symbols_tested": 171,
+    "total_signals": 46,
+    "total_closed": 46,
+    "total_wins": 28,
+    "win_rate": 60.87,
+    "tp_count": 28,
+    "sl_count": 18,
+    "tp_rate": 60.87,
+    "sl_rate": 39.13,
+    "total_pnl_u": -230.21,
+    "total_fee_u": 55.2,
+    "final_capital": 9769.79,
+    "avg_win_u": 34.01,
+    "avg_loss_u": -65.69,
+    "rr_ratio": 0.5177
   },
   "1h": {
     "timeframe": "1h",
     "capital": 10000.0,
-    "symbols_tested": 172,
-    "total_signals": 95,
-    "total_closed": 95,
-    "total_wins": 61,
-    "win_rate": 64.21,
-    "tp_count": 61,
-    "sl_count": 34,
-    "tp_rate": 64.21,
-    "sl_rate": 35.79,
-    "total_pnl_u": 1492.09,
-    "total_fee_u": 114.0,
-    "final_capital": 11492.09,
-    "avg_win_u": 52.19,
-    "avg_loss_u": -49.75,
-    "rr_ratio": 1.049
+    "symbols_tested": 171,
+    "total_signals": 0,
+    "total_closed": 0,
+    "total_wins": 0,
+    "win_rate": 0,
+    "tp_count": 0,
+    "sl_count": 0,
+    "tp_rate": 0,
+    "sl_rate": 0,
+    "total_pnl_u": 0,
+    "total_fee_u": 0,
+    "final_capital": 10000.0,
+    "avg_win_u": 0,
+    "avg_loss_u": 0,
+    "rr_ratio": 0
   },
   "4h": {
     "timeframe": "4h",
     "capital": 10000.0,
-    "symbols_tested": 172,
-    "total_signals": 213,
-    "total_closed": 213,
-    "total_wins": 131,
-    "win_rate": 61.5,
-    "tp_count": 131,
-    "sl_count": 82,
-    "tp_rate": 61.5,
-    "sl_rate": 38.5,
-    "total_pnl_u": 2372.78,
-    "total_fee_u": 255.6,
-    "final_capital": 12372.78,
-    "avg_win_u": 51.46,
-    "avg_loss_u": -53.28,
-    "rr_ratio": 0.9659
+    "symbols_tested": 171,
+    "total_signals": 0,
+    "total_closed": 0,
+    "total_wins": 0,
+    "win_rate": 0,
+    "tp_count": 0,
+    "sl_count": 0,
+    "tp_rate": 0,
+    "sl_rate": 0,
+    "total_pnl_u": 0,
+    "total_fee_u": 0,
+    "final_capital": 10000.0,
+    "avg_win_u": 0,
+    "avg_loss_u": 0,
+    "rr_ratio": 0
   }
 };
 const TF_COINS = {
   "30m": [
     {
-      "s": "PYTH",
-      "total": 10,
-      "wins": 10,
-      "wr": 100.0,
-      "pnl": 335.67
-    },
-    {
-      "s": "PYTH",
-      "total": 10,
-      "wins": 10,
-      "wr": 100.0,
-      "pnl": 335.67
-    },
-    {
-      "s": "METIS",
-      "total": 8,
-      "wins": 8,
-      "wr": 100.0,
-      "pnl": 263.09
-    },
-    {
-      "s": "OP",
-      "total": 7,
-      "wins": 7,
-      "wr": 100.0,
-      "pnl": 205.28
-    },
-    {
-      "s": "AXL",
-      "total": 5,
-      "wins": 5,
-      "wr": 100.0,
-      "pnl": 148.77
-    },
-    {
-      "s": "ETHFI",
-      "total": 5,
-      "wins": 5,
-      "wr": 100.0,
-      "pnl": 138.52
-    },
-    {
-      "s": "XVG",
-      "total": 4,
-      "wins": 4,
-      "wr": 100.0,
-      "pnl": 100.21
-    },
-    {
-      "s": "EDU",
-      "total": 2,
-      "wins": 2,
-      "wr": 100.0,
-      "pnl": 49.12
-    },
-    {
-      "s": "SSV",
-      "total": 2,
-      "wins": 2,
-      "wr": 100.0,
-      "pnl": 47.74
-    },
-    {
-      "s": "API3",
-      "total": 1,
-      "wins": 1,
-      "wr": 100.0,
-      "pnl": 23.43
-    },
-    {
-      "s": "INJ",
-      "total": 1,
-      "wins": 1,
-      "wr": 100.0,
-      "pnl": 24.58
-    },
-    {
-      "s": "SOL",
-      "total": 1,
-      "wins": 1,
-      "wr": 100.0,
-      "pnl": 24.76
-    },
-    {
       "s": "DYDX",
       "total": 19,
-      "wins": 18,
-      "wr": 94.74,
-      "pnl": 488.91
-    },
-    {
-      "s": "PENDLE",
-      "total": 12,
-      "wins": 10,
-      "wr": 83.33,
-      "pnl": 212.48
-    },
-    {
-      "s": "ICP",
-      "total": 5,
-      "wins": 4,
-      "wr": 80.0,
-      "pnl": 74.63
-    },
-    {
-      "s": "SYN",
-      "total": 22,
       "wins": 17,
-      "wr": 77.27,
-      "pnl": 1377.79
-    },
-    {
-      "s": "RIF",
-      "total": 8,
-      "wins": 6,
-      "wr": 75.0,
-      "pnl": 487.93
-    },
-    {
-      "s": "WLD",
-      "total": 8,
-      "wins": 6,
-      "wr": 75.0,
-      "pnl": 139.56
-    },
-    {
-      "s": "MEME",
-      "total": 4,
-      "wins": 3,
-      "wr": 75.0,
-      "pnl": 50.9
-    },
-    {
-      "s": "UMA",
-      "total": 4,
-      "wins": 3,
-      "wr": 75.0,
-      "pnl": 57.71
-    },
-    {
-      "s": "JTO",
-      "total": 11,
-      "wins": 7,
-      "wr": 63.64,
-      "pnl": 96.59
+      "wr": 89.47,
+      "pnl": 386.76
     },
     {
       "s": "AGLD",
       "total": 5,
       "wins": 3,
       "wr": 60.0,
-      "pnl": 38.78
-    },
-    {
-      "s": "JUP",
-      "total": 12,
-      "wins": 7,
-      "wr": 58.33,
-      "pnl": 24.07
-    },
-    {
-      "s": "PORTAL",
-      "total": 7,
-      "wins": 4,
-      "wr": 57.14,
-      "pnl": 38.46
-    },
-    {
-      "s": "LIT",
-      "total": 10,
-      "wins": 5,
-      "wr": 50.0,
-      "pnl": -18.46
+      "pnl": 38.77
     },
     {
       "s": "BEL",
-      "total": 8,
-      "wins": 4,
-      "wr": 50.0,
-      "pnl": -208.28
-    },
-    {
-      "s": "DASH",
-      "total": 2,
-      "wins": 1,
-      "wr": 50.0,
-      "pnl": -0.93
+      "total": 7,
+      "wins": 3,
+      "wr": 42.86,
+      "pnl": -235.19
     },
     {
       "s": "AAVE",
       "total": 13,
       "wins": 5,
       "wr": 38.46,
-      "pnl": -94.64
-    },
-    {
-      "s": "ID",
-      "total": 8,
-      "wins": 3,
-      "wr": 37.5,
-      "pnl": -77.04
-    },
-    {
-      "s": "W",
-      "total": 9,
-      "wins": 3,
-      "wr": 33.33,
-      "pnl": -93.88
-    },
-    {
-      "s": "SAGA",
-      "total": 3,
-      "wins": 1,
-      "wr": 33.33,
-      "pnl": -28.75
-    },
-    {
-      "s": "ZEC",
-      "total": 3,
-      "wins": 1,
-      "wr": 33.33,
-      "pnl": -26.86
-    },
-    {
-      "s": "ZRO",
-      "total": 7,
-      "wins": 2,
-      "wr": 28.57,
-      "pnl": -203.69
-    },
-    {
-      "s": "ENJ",
-      "total": 8,
-      "wins": 2,
-      "wr": 25.0,
-      "pnl": -124.94
-    },
-    {
-      "s": "NOT",
-      "total": 8,
-      "wins": 2,
-      "wr": 25.0,
-      "pnl": -141.18
-    },
-    {
-      "s": "TIA",
-      "total": 8,
-      "wins": 2,
-      "wr": 25.0,
-      "pnl": -168.09
-    },
-    {
-      "s": "SEI",
-      "total": 4,
-      "wins": 1,
-      "wr": 25.0,
-      "pnl": -60.43
-    },
-    {
-      "s": "SUSHI",
-      "total": 4,
-      "wins": 1,
-      "wr": 25.0,
-      "pnl": -53.8
-    },
-    {
-      "s": "NEAR",
-      "total": 7,
-      "wins": 1,
-      "wr": 14.29,
-      "pnl": -202.1
-    },
-    {
-      "s": "UNI",
-      "total": 5,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -221.16
-    },
-    {
-      "s": "MOVR",
-      "total": 3,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -81.46
-    },
-    {
-      "s": "MOVR",
-      "total": 3,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -81.46
+      "pnl": -84.79
     },
     {
       "s": "BICO",
       "total": 2,
       "wins": 0,
       "wr": 0.0,
-      "pnl": -336.35
-    },
-    {
-      "s": "CFX",
-      "total": 2,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -57.61
-    },
-    {
-      "s": "TNSR",
-      "total": 2,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -57.95
-    },
-    {
-      "s": "ZEN",
-      "total": 2,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -51.99
-    },
-    {
-      "s": "JASMY",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -32.73
-    },
-    {
-      "s": "MANTA",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -43.1
-    },
-    {
-      "s": "XLM",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -44.16
+      "pnl": -335.75
     }
   ],
-  "1h": [
-    {
-      "s": "NEAR",
-      "total": 5,
-      "wins": 5,
-      "wr": 100.0,
-      "pnl": 264.96
-    },
-    {
-      "s": "BEL",
-      "total": 3,
-      "wins": 3,
-      "wr": 100.0,
-      "pnl": 289.02
-    },
-    {
-      "s": "SYN",
-      "total": 2,
-      "wins": 2,
-      "wr": 100.0,
-      "pnl": 370.9
-    },
-    {
-      "s": "DYDX",
-      "total": 1,
-      "wins": 1,
-      "wr": 100.0,
-      "pnl": 23.69
-    },
-    {
-      "s": "JUP",
-      "total": 8,
-      "wins": 7,
-      "wr": 87.5,
-      "pnl": 212.04
-    },
-    {
-      "s": "WLD",
-      "total": 29,
-      "wins": 23,
-      "wr": 79.31,
-      "pnl": 839.68
-    },
-    {
-      "s": "PORTAL",
-      "total": 4,
-      "wins": 3,
-      "wr": 75.0,
-      "pnl": 122.35
-    },
-    {
-      "s": "INJ",
-      "total": 9,
-      "wins": 6,
-      "wr": 66.67,
-      "pnl": 131.47
-    },
-    {
-      "s": "RIF",
-      "total": 6,
-      "wins": 4,
-      "wr": 66.67,
-      "pnl": 42.38
-    },
-    {
-      "s": "JTO",
-      "total": 3,
-      "wins": 2,
-      "wr": 66.67,
-      "pnl": 15.39
-    },
-    {
-      "s": "LIT",
-      "total": 6,
-      "wins": 3,
-      "wr": 50.0,
-      "pnl": -5.38
-    },
-    {
-      "s": "MEME",
-      "total": 4,
-      "wins": 2,
-      "wr": 50.0,
-      "pnl": 3.08
-    },
-    {
-      "s": "XLM",
-      "total": 5,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -469.18
-    },
-    {
-      "s": "METIS",
-      "total": 3,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -111.14
-    },
-    {
-      "s": "PROM",
-      "total": 3,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -85.56
-    },
-    {
-      "s": "CRV",
-      "total": 2,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -66.98
-    },
-    {
-      "s": "AAVE",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -50.96
-    },
-    {
-      "s": "ICP",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -33.65
-    }
-  ],
-  "4h": [
-    {
-      "s": "SFP",
-      "total": 12,
-      "wins": 12,
-      "wr": 100.0,
-      "pnl": 350.21
-    },
-    {
-      "s": "PENDLE",
-      "total": 7,
-      "wins": 7,
-      "wr": 100.0,
-      "pnl": 590.65
-    },
-    {
-      "s": "ZEC",
-      "total": 7,
-      "wins": 7,
-      "wr": 100.0,
-      "pnl": 702.22
-    },
-    {
-      "s": "JST",
-      "total": 6,
-      "wins": 6,
-      "wr": 100.0,
-      "pnl": 395.78
-    },
-    {
-      "s": "LIT",
-      "total": 6,
-      "wins": 6,
-      "wr": 100.0,
-      "pnl": 490.27
-    },
-    {
-      "s": "COMP",
-      "total": 4,
-      "wins": 4,
-      "wr": 100.0,
-      "pnl": 152.86
-    },
-    {
-      "s": "BTC",
-      "total": 2,
-      "wins": 2,
-      "wr": 100.0,
-      "pnl": 51.0
-    },
-    {
-      "s": "PORTAL",
-      "total": 2,
-      "wins": 2,
-      "wr": 100.0,
-      "pnl": 80.88
-    },
-    {
-      "s": "NOT",
-      "total": 1,
-      "wins": 1,
-      "wr": 100.0,
-      "pnl": 36.09
-    },
-    {
-      "s": "PEOPLE",
-      "total": 1,
-      "wins": 1,
-      "wr": 100.0,
-      "pnl": 36.59
-    },
-    {
-      "s": "ZRO",
-      "total": 1,
-      "wins": 1,
-      "wr": 100.0,
-      "pnl": 23.77
-    },
-    {
-      "s": "JTO",
-      "total": 13,
-      "wins": 12,
-      "wr": 92.31,
-      "pnl": 908.73
-    },
-    {
-      "s": "MANTA",
-      "total": 17,
-      "wins": 15,
-      "wr": 88.24,
-      "pnl": 348.9
-    },
-    {
-      "s": "NMR",
-      "total": 6,
-      "wins": 5,
-      "wr": 83.33,
-      "pnl": 117.41
-    },
-    {
-      "s": "DUSK",
-      "total": 11,
-      "wins": 9,
-      "wr": 81.82,
-      "pnl": 158.36
-    },
-    {
-      "s": "BOME",
-      "total": 5,
-      "wins": 4,
-      "wr": 80.0,
-      "pnl": 194.19
-    },
-    {
-      "s": "POLYX",
-      "total": 5,
-      "wins": 4,
-      "wr": 80.0,
-      "pnl": 73.29
-    },
-    {
-      "s": "TIA",
-      "total": 6,
-      "wins": 4,
-      "wr": 66.67,
-      "pnl": 74.84
-    },
-    {
-      "s": "RIF",
-      "total": 10,
-      "wins": 6,
-      "wr": 60.0,
-      "pnl": 66.9
-    },
-    {
-      "s": "ONDO",
-      "total": 5,
-      "wins": 3,
-      "wr": 60.0,
-      "pnl": 48.04
-    },
-    {
-      "s": "BLUR",
-      "total": 4,
-      "wins": 2,
-      "wr": 50.0,
-      "pnl": -0.39
-    },
-    {
-      "s": "FIDA",
-      "total": 4,
-      "wins": 2,
-      "wr": 50.0,
-      "pnl": -4.44
-    },
-    {
-      "s": "ATOM",
-      "total": 2,
-      "wins": 1,
-      "wr": 50.0,
-      "pnl": -6.14
-    },
-    {
-      "s": "THETA",
-      "total": 2,
-      "wins": 1,
-      "wr": 50.0,
-      "pnl": -1.33
-    },
-    {
-      "s": "NEAR",
-      "total": 12,
-      "wins": 5,
-      "wr": 41.67,
-      "pnl": -239.41
-    },
-    {
-      "s": "DYDX",
-      "total": 11,
-      "wins": 4,
-      "wr": 36.36,
-      "pnl": -224.21
-    },
-    {
-      "s": "LDO",
-      "total": 3,
-      "wins": 1,
-      "wr": 33.33,
-      "pnl": -37.05
-    },
-    {
-      "s": "INJ",
-      "total": 7,
-      "wins": 2,
-      "wr": 28.57,
-      "pnl": -277.44
-    },
-    {
-      "s": "ALGO",
-      "total": 5,
-      "wins": 1,
-      "wr": 20.0,
-      "pnl": -129.07
-    },
-    {
-      "s": "JUP",
-      "total": 5,
-      "wins": 1,
-      "wr": 20.0,
-      "pnl": -178.03
-    },
-    {
-      "s": "MTL",
-      "total": 3,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -89.76
-    },
-    {
-      "s": "API3",
-      "total": 2,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -105.86
-    },
-    {
-      "s": "ARB",
-      "total": 2,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -95.93
-    },
-    {
-      "s": "CFX",
-      "total": 2,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -86.52
-    },
-    {
-      "s": "KSM",
-      "total": 2,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -52.78
-    },
-    {
-      "s": "RLC",
-      "total": 2,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -62.16
-    },
-    {
-      "s": "SLP",
-      "total": 2,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -93.86
-    },
-    {
-      "s": "SLP",
-      "total": 2,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -93.86
-    },
-    {
-      "s": "BEL",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -31.29
-    },
-    {
-      "s": "CELO",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -34.09
-    },
-    {
-      "s": "CHR",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -31.14
-    },
-    {
-      "s": "ENJ",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -26.03
-    },
-    {
-      "s": "JOE",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -30.48
-    },
-    {
-      "s": "MOVR",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -69.99
-    },
-    {
-      "s": "MOVR",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -69.99
-    },
-    {
-      "s": "NEO",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -27.22
-    },
-    {
-      "s": "ORDI",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -112.41
-    },
-    {
-      "s": "RSR",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -46.41
-    },
-    {
-      "s": "SCRT",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -44.48
-    },
-    {
-      "s": "TLM",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -36.95
-    },
-    {
-      "s": "TRB",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -50.71
-    },
-    {
-      "s": "WLD",
-      "total": 1,
-      "wins": 0,
-      "wr": 0.0,
-      "pnl": -138.8
-    }
-  ]
+  "1h": [],
+  "4h": []
 };
 
 let currentTF = '30m';
